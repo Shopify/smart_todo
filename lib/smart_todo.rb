@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "smart_todo/version"
 
 module SmartTodo
