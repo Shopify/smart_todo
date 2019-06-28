@@ -3,6 +3,9 @@
 require "smart_todo/version"
 
 module SmartTodo
-  class Error < StandardError; end
-  # Your code goes here...
+  module Parser
+    autoload :CommentParser,          'smart_todo/parser/comment_parser'
+    autoload :TodoNode,               'smart_todo/parser/todo_node'
+    autoload :TodoMetadata,           'smart_todo/parser/todo_metadata'
+  end
 end
