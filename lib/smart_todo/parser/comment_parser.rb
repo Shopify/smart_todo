@@ -37,7 +37,7 @@ module SmartTodo
       end
 
       def todo_comment?(comment)
-        @node && @node.indented_comment?(comment)
+        @node&.indented_comment?(comment)
       end
 
       def append_existing_node(data)
