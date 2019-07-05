@@ -24,9 +24,7 @@ module SmartTodo
     end
 
     def validate_options!
-      @options.fetch(:slack_token) do
-        ENV.fetch('SMART_TODO_SLACK_TOKEN') { raise(ArgumentError, 'Missing :slack_token') }
-      end
+      @options[:slack_token] ||= ENV.fetch('SMART_TODO_SLACK_TOKEN') { raise(ArgumentError, 'Missing :slack_token') }
 
       @options.fetch(:fallback_channel) { raise(ArgumentError, 'Missing :fallback_channel') }
     end
