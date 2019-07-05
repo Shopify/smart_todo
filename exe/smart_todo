@@ -5,4 +5,5 @@ $LOAD_PATH.unshift("#{__dir__}/../lib")
 
 require 'smart_todo'
 
+exit(0) unless ENV['ENABLE_SMART_TODO']
 SmartTodo::CLI.new.run
