@@ -14,7 +14,7 @@ module SmartTodo
       end
 
       def self.message(on_date)
-        "We are past the *#{on_date}* due date"
+        "We are past the *#{on_date}* due date and your TODO is now ready to be addressed."
       end
     end
   end

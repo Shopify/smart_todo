@@ -8,7 +8,9 @@ module SmartTodo
     class DateTest < Minitest::Test
       def test_when_date_is_in_the_past
         Time.stub(:now, Time.parse('2019-07-04 02:57:18 +0000')) do
-          assert_equal('We are past the *2019-07-03 02:57:18 +0000* due date', Date.met?('2019-07-03 02:57:18 +0000'))
+          expected = 'We are past the *2019-07-03 02:57:18 +0000* due date and your TODO is now ready to be addressed.'
+
+          assert_equal(expected, Date.met?('2019-07-03 02:57:18 +0000'))
         end
       end
 
