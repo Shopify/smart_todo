@@ -24,11 +24,11 @@ module SmartTodo
       end
 
       def error_message
-        "The gem *#{@gem_name}* doesn't seem to exist"
+        "The gem *#{@gem_name}* doesn't seem to exist, I can't determine if your TODO is ready to be addressed."
       end
 
       def message
-        "The gem *#{@gem_name}* was released to version *#{@version}*"
+        "The gem *#{@gem_name}* was released to version *#{@version}* and your TODO is now ready to be addressed."
       end
 
       private

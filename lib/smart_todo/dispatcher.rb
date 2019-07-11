@@ -43,9 +43,11 @@ module SmartTodo
       <<~EOM
         #{header}
 
-        You have an assigned TODO in the #{@file} file.
-        #{@event_message} and your TODO is now ready to be addressed.
+        You have an assigned TODO in the `#{@file}` file.
+        #{@event_message}
+
         Here is the associated comment on your TODO:
+
         ```
         #{@todo_node.comment.strip}
         ```
