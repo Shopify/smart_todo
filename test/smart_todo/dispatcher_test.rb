@@ -53,11 +53,26 @@ module SmartTodo
       end
     end
 
+    def test_when_user_is_a_slack_channel
+      stub_request(:post, /chat.postMessage/)
+        .to_return(body: JSON.dump(ok: true))
+
+      dispatcher = Dispatcher.new('Foo', todo_node('#my_channel'), 'file.rb', @options)
+      dispatcher.dispatch
+
+      assert_requested(:post, /chat.postMessage/) do |request|
+        request_body = JSON.parse(request.body)
+
+        assert_match('Hello Team', request_body['text'])
+        assert_equal('#my_channel', request_body['channel'])
+      end
+    end
+
     private
 
-    def todo_node
+    def todo_node(assignee = 'john@example.com')
       ruby_code = <<~EOM
-        # @smart_todo on_date('2011-03-02') > assignee('john@example.com')
+        # @smart_todo on_date('2011-03-02') > assignee('#{assignee}')
         def hello
         end
       EOM
