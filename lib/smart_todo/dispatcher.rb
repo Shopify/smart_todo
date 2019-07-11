@@ -10,15 +10,21 @@ module SmartTodo
     end
 
     def dispatch
-      user = retrieve_slack_user
+      assignee = @todo_node.metadata.assignee[0]
+
+      user = if email?(assignee)
+        retrieve_slack_user(assignee)
+      else
+        { 'user' => { 'id' => assignee, 'profile' => { 'first_name' => 'Team' } } }
+      end
 
       client.post_message(user.dig('user', 'id'), slack_message(user))
     end
 
     private
 
-    def retrieve_slack_user
-      client.lookup_user_by_email(@todo_node.metadata.assignee[0])
+    def retrieve_slack_user(assignee)
+      client.lookup_user_by_email(assignee)
     rescue SlackClient::Error => error
       if error.error_code == 'users_not_found'
         { 'user' => { 'id' => @options[:fallback_channel] }, 'fallback' => true }
@@ -58,6 +64,10 @@ module SmartTodo
 
     def client
       @client ||= SlackClient.new(@options[:slack_token])
+    end
+
+    def email?(assignee)
+      assignee.include?("@")
     end
   end
 end
