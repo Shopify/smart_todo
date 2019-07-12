@@ -8,8 +8,8 @@ module SmartTodo
       Date.met?(date)
     end
 
-    def on_gem_release(gem_name, version)
-      GemRelease.new(gem_name, version).met?
+    def on_gem_release(gem_name, *requirements)
+      GemRelease.new(gem_name, requirements).met?
     end
 
     def on_pull_request_closed(organization, repo, pr_number)

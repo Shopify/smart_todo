@@ -13,6 +13,22 @@ module SmartTodo
         assert_equal(expected, GemRelease.new('foo', '1.2.0').met?)
       end
 
+      def test_with_pessimistic_constraint
+        stub_request(:get, /rubygems.org/)
+          .to_return(body: JSON.dump([{ number: '1.2.0' }]))
+
+        expected = 'The gem *foo* was released to version *1.2.0* and your TODO is now ready to be addressed.'
+        assert_equal(expected, GemRelease.new('foo', '~> 1.1').met?)
+      end
+
+      def test_with_multiple_constraints
+        stub_request(:get, /rubygems.org/)
+          .to_return(body: JSON.dump([{ number: '3.4.6' }]))
+
+        expected = 'The gem *foo* was released to version *3.4.6* and your TODO is now ready to be addressed.'
+        assert_equal(expected, GemRelease.new('foo', ['> 3.4.3', '< 4']).met?)
+      end
+
       def test_when_gem_is_not_yet_released
         stub_request(:get, /rubygems.org/)
           .to_return(body: JSON.dump([{ number: '1.2.0' }, { number: '1.2.1' }]))
