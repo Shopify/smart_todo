@@ -18,5 +18,6 @@ module SmartTodo
   module Events
     autoload :Date,                   'smart_todo/events/date'
     autoload :GemRelease,             'smart_todo/events/gem_release'
+    autoload :PullRequestClose,       'smart_todo/events/pull_request_close'
   end
 end
