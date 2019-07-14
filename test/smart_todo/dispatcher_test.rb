@@ -72,7 +72,7 @@ module SmartTodo
 
     def todo_node(assignee = 'john@example.com')
       ruby_code = <<~EOM
-        # @smart_todo on_date('2011-03-02') > assignee('#{assignee}')
+        # TODO(on: date('2011-03-02'), to: '#{assignee}')
         def hello
         end
       EOM

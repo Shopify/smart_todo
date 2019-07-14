@@ -11,7 +11,6 @@ module SmartTodo
   module Parser
     autoload :CommentParser,          'smart_todo/parser/comment_parser'
     autoload :TodoNode,               'smart_todo/parser/todo_node'
-    autoload :ASTNode,                'smart_todo/parser/ast_node'
     autoload :MetadataParser,         'smart_todo/parser/metadata_parser'
   end
 

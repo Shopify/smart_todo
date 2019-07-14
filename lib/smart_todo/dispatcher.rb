@@ -7,15 +7,14 @@ module SmartTodo
       @todo_node = todo_node
       @options = options
       @file = file
+      @assignee = @todo_node.metadata.assignee
     end
 
     def dispatch
-      assignee = @todo_node.metadata.assignee[0]
-
-      user = if email?(assignee)
-        retrieve_slack_user(assignee)
+      user = if email?
+        retrieve_slack_user
       else
-        { 'user' => { 'id' => assignee, 'profile' => { 'first_name' => 'Team' } } }
+        { 'user' => { 'id' => @assignee, 'profile' => { 'first_name' => 'Team' } } }
       end
 
       client.post_message(user.dig('user', 'id'), slack_message(user))
@@ -23,8 +22,8 @@ module SmartTodo
 
     private
 
-    def retrieve_slack_user(assignee)
-      client.lookup_user_by_email(assignee)
+    def retrieve_slack_user
+      client.lookup_user_by_email(@assignee)
     rescue SlackClient::Error => error
       if error.error_code == 'users_not_found'
         { 'user' => { 'id' => @options[:fallback_channel] }, 'fallback' => true }
@@ -55,9 +54,7 @@ module SmartTodo
     end
 
     def unexisting_user
-      assignee = @todo_node.metadata.assignee[0]
-
-      "Hello :wave:,\n\n`#{assignee}` had an assigned TODO but this user doesn't exist on Slack anymore."
+      "Hello :wave:,\n\n`#{@assignee}` had an assigned TODO but this user doesn't exist on Slack anymore."
     end
 
     def existing_user(user)
@@ -68,8 +65,8 @@ module SmartTodo
       @client ||= SlackClient.new(@options[:slack_token])
     end
 
-    def email?(assignee)
-      assignee.include?("@")
+    def email?
+      @assignee.include?("@")
     end
   end
 end
