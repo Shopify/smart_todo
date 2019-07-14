@@ -7,49 +7,65 @@ module SmartTodo
     class MetadataParserTest < Minitest::Test
       def test_parse_todo_metadata_with_one_event
         ruby_code = <<~RUBY
-          on_date('2019-08-04') > assignee('john@example.com')
+          TODO(on: date('2019-08-04'), to: 'john@example.com')
         RUBY
 
-        result = MetadataParser.new(ruby_code).parse
-        assert_equal('on_date', result.events[0].method_name)
-        assert_equal('john@example.com', result.assignee[0])
+        result = MetadataParser.parse(ruby_code)
+        assert_equal(1, result.events.size)
+        assert_equal('date', result.events[0].method_name)
+        assert_equal('john@example.com', result.assignee)
       end
 
       def test_parse_todo_metadata_with_multiple_event
         ruby_code = <<~RUBY
-          on_date('2019-08-04') | on_gem_release('v1.2') > assignee('john@example.com')
+          TODO(on: date('2019-08-04'), on: gem_release('v1.2'), to: 'john@example.com')
         RUBY
 
-        result = MetadataParser.new(ruby_code).parse
-        assert_equal(2, result.events.count)
-        assert_equal('on_date', result.events[0].method_name)
-        assert_equal('on_gem_release', result.events[1].method_name)
-        assert_equal('john@example.com', result.assignee[0])
+        result = MetadataParser.parse(ruby_code)
+        assert_equal(2, result.events.size)
+        assert_equal('date', result.events[0].method_name)
+        assert_equal('gem_release', result.events[1].method_name)
+        assert_equal('john@example.com', result.assignee)
       end
 
       def test_parse_todo_metadata_with_no_assignee
         ruby_code = <<~RUBY
-          on_date('2019-08-04') | on_gem_release('v1.2')
+          TODO(on: date('2019-08-04'))
         RUBY
 
-        result = MetadataParser.new(ruby_code).parse
-        assert_equal(2, result.events.count)
-        assert_equal('on_date', result.events[0].method_name)
-        assert_equal('on_gem_release', result.events[1].method_name)
+        result = MetadataParser.parse(ruby_code)
+        assert_equal('date', result.events[0].method_name)
         assert_nil(result.assignee)
       end
 
       def test_parse_todo_metadata_with_multiple_arguments
         ruby_code = <<~RUBY
-          on_date('a', 'b', 'c') | on_gem_release('d', 'e', 'f')
+          TODO(on: something('abc', '123', '456'), to: 'john@example.com')
         RUBY
 
-        result = MetadataParser.new(ruby_code).parse
-        assert_equal(2, result.events.count)
-        assert_equal('on_date', result.events[0].method_name)
-        assert_equal(['a', 'b', 'c'], result.events[0])
-        assert_equal('on_gem_release', result.events[1].method_name)
-        assert_equal(['d', 'e', 'f'], result.events[1])
+        result = MetadataParser.parse(ruby_code)
+        assert_equal('something', result.events[0].method_name)
+        assert_equal(['abc', '123', '456'], result.events[0].arguments)
+        assert_equal('john@example.com', result.assignee)
+      end
+
+      def test_parse_when_todo_metadata_is_uncorrectly_formatted
+        ruby_code = <<~RUBY
+          TODO(foo: 'bar', lol: 'ahah')
+        RUBY
+
+        result = MetadataParser.parse(ruby_code)
+        assert_empty(result.events)
+        assert_nil(result.assignee)
+      end
+
+      def test_parse_when_todo_metadata_is_not_ruby_code
+        ruby_code = <<~RUBY
+          TODO: Do this when done
+        RUBY
+
+        result = MetadataParser.parse(ruby_code)
+        assert_empty(result.events)
         assert_nil(result.assignee)
       end
     end

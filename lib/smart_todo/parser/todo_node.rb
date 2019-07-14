@@ -8,7 +8,7 @@ module SmartTodo
       attr_reader :metadata
 
       def initialize(todo)
-        @metadata = MetadataParser.new(todo.gsub(/^#\s+@smart_todo/, '')).parse
+        @metadata = MetadataParser.parse(todo.gsub(/^#/, ''))
         @comments = []
         @start = todo.match(/^#(\s+)/)[1].size
       end

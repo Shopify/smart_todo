@@ -53,7 +53,7 @@ module SmartTodo
     def test_dispatch_slack_message_when_a_todo_is_met
       cli = CLI.new
       ruby_code = <<~EOM
-        # @smart_todo on_date('2015-03-01') > assignee('john@example.com')
+        # TODO(on: date('2015-03-01'), to: 'john@example.com')
         #   Revisit the way we say hello.
         #   Please.
         def hello
@@ -76,7 +76,7 @@ module SmartTodo
     def test_does_not_dispatch_slack_message_when_a_todo_is_unmet
       cli = CLI.new
       ruby_code = <<~EOM
-        # @smart_todo on_date('2070-03-01') > assignee('john@example.com')
+        # TODO(on: date('2070-03-01'), to: 'john@example.com')
         #   Revisit the way we say hello.
         #   Please.
         def hello
