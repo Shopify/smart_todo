@@ -50,7 +50,7 @@ module SmartTodo
       end
     end
 
-    def test_dispatch_slack_message_when_a_todo_is_met
+    def test_dispatch_slack_message_when_a_todo_is_met_dudek
       cli = CLI.new
       ruby_code = <<~EOM
         # TODO(on: date('2015-03-01'), to: 'john@example.com')
@@ -60,17 +60,16 @@ module SmartTodo
         end
       EOM
 
+      mock = Minitest::Mock.new
+      mock.expect(:dispatch, nil)
+
       generate_ruby_file(ruby_code) do |file|
-        stub_slack_request
-        cli.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"'])
+        Dispatcher.stub(:new, mock) do
+          cli.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"'])
+        end
       end
 
-      assert_requested(:post, /chat.postMessage/) do |request|
-        request_body = JSON.parse(request.body)
-
-        assert_match('Hello John', request_body['text'])
-        assert_match('We are past the *2015-03-01* due date', request_body['text'])
-      end
+      assert_mock(mock)
     end
 
     def test_does_not_dispatch_slack_message_when_a_todo_is_unmet
@@ -88,28 +87,6 @@ module SmartTodo
       end
 
       assert_not_requested(:post, /chat.postMessage/)
-    end
-
-    private
-
-    def stub_slack_request
-      stub_request(:get, /users.lookupByEmail/)
-        .to_return(body: JSON.dump(ok: true, user: { id: 'ABC', profile: { first_name: 'John' } }))
-
-      stub_request(:post, /chat.postMessage/)
-        .to_return(body: JSON.dump(ok: true))
-    end
-
-    def generate_ruby_file(ruby_code)
-      tempfile = Tempfile.open(['file', '.rb']) do |file|
-        file.write(ruby_code)
-        file.rewind
-        file
-      end
-
-      yield(tempfile)
-    ensure
-      tempfile.delete
     end
   end
 end

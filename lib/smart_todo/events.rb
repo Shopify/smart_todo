@@ -12,9 +12,9 @@ module SmartTodo
       GemRelease.new(gem_name, requirements).met?
     end
 
-    def pull_request_closed(organization, repo, pr_number)
-      PullRequestClosed.new(organization, repo, pr_number).met?
+    def pull_request_close(organization, repo, pr_number)
+      PullRequestClose.new(organization, repo, pr_number).met?
     end
-    alias_method :issue_close, :pull_request_closed
+    alias_method :issue_close, :pull_request_close
   end
 end
