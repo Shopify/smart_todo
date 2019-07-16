@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    smart_todo (0.1.0.alpha3)
+    smart_todo (0.1.0.beta1)
 
 GEM
   remote: https://rubygems.org/
