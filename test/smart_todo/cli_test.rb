@@ -50,7 +50,7 @@ module SmartTodo
       end
     end
 
-    def test_dispatch_slack_message_when_a_todo_is_met_dudek
+    def test_dispatch_slack_message_when_a_todo_is_met
       cli = CLI.new
       ruby_code = <<~EOM
         # TODO(on: date('2015-03-01'), to: 'john@example.com')
