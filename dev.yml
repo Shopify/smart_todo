@@ -1,0 +1,11 @@
+name: smart-todo
+
+type:
+  - ruby
+
+up:
+  - ruby: 2.5.5
+  - bundler
+
+test:
+  bundle exec rake test
