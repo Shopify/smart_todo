@@ -50,7 +50,7 @@ module SmartTodo
     end
 
     def parse_file(file)
-      Parser::CommentParser.new(File.read(file)).parse.each do |todo_node|
+      Parser::CommentParser.new(File.read(file, encoding: 'UTF-8')).parse.each do |todo_node|
         event_message = nil
         event_met = todo_node.metadata.events.find do |event|
           event_message = Events.public_send(event.method_name, *event.arguments)
