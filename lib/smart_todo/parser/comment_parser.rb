@@ -33,7 +33,7 @@ module SmartTodo
       private
 
       def todo_metadata?(comment)
-        comment.start_with?(/#\sTODO\(/)
+        /^#\sTODO\(/.match?(comment)
       end
 
       def todo_comment?(comment)
