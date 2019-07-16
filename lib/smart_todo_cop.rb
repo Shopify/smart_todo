@@ -11,7 +11,7 @@ module RuboCop
 
         def investigate(processed_source)
           processed_source.comments.each do |comment|
-            next unless /^#\sTODO/.match?(comment.text)
+            next unless /^#\sTODO/ =~ comment.text
             next if smart_todo?(comment.text)
 
             add_offense(comment)
