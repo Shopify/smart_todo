@@ -9,7 +9,7 @@ module SmartTodo
     end
 
     def run(args = ARGV)
-      paths = define_options.parse!(args, into: @options)
+      paths = define_options.parse!(args)
       validate_options!
       paths << '.' if paths.empty?
 
@@ -32,8 +32,12 @@ module SmartTodo
     def define_options
       OptionParser.new do |opts|
         opts.banner = "Usage: smart_todo [options] file_or_path1 file_or_path2 ..."
-        opts.on('--slack_token TOKEN')
-        opts.on('--fallback_channel CHANNEL')
+        opts.on('--slack_token TOKEN') do |token|
+          @options[:slack_token] = token
+        end
+        opts.on('--fallback_channel CHANNEL') do |channel|
+          @options[:fallback_channel] = channel
+        end
       end
     end
 
