@@ -1,15 +1,37 @@
 containers:
-  default:
+  ruby-2.3:
+    docker: circleci/ruby:2.3
+  ruby-2.4:
+    docker: circleci/ruby:2.4
+  ruby-2.5:
     docker: circleci/ruby:2.5
+  ruby-2.6:
+    docker: circleci/ruby:2.6
+
+shared:
+  defaults: &defaults
+    timeout: 5m
+    dependencies:
+    - bundler
+    run:
+      - bundle exec rake test
 
 steps:
 - label: ":cop: Ruby style check"
   timeout: 5m
+  container: ruby-2.5
   dependencies:
   - bundler
   run: bin/rubocop
-- label: ":ruby: Ruby tests"
-  timeout: 5m
-  dependencies:
-  - bundler
-  run: bundle exec rake test
+- label: ":ruby: Ruby 2.3"
+  container: ruby-2.3
+  <<: *defaults
+- label: ":ruby: Ruby 2.4"
+  container: ruby-2.4
+  <<: *defaults
+- label: ":ruby: Ruby 2.5"
+  container: ruby-2.5
+  <<: *defaults
+- label: ":ruby: Ruby 2.6"
+  container: ruby-2.6
+  <<: *defaults
