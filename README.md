@@ -34,7 +34,7 @@ When the TODO's event is met (i.e. a certain date is reached), the TODO's assign
 
 **With SmartTodo**
 ```ruby
-  # TODO(on: on_date('2019-07-01'), to: 'john@example.com')
+  # TODO(on: date('2019-07-01'), to: 'john@example.com')
   #   The API provider is modifying its endpoint, we need to modify our code.
   def api_call
   end
@@ -46,4 +46,4 @@ Please check out the GitHub [wiki](https://github.com/Shopify/smart_todo/wiki) f
 
 License
 --------
-This project is licensed under the terms of the MIT license. See the [LICENSE](LICENSE) file.
+This project is licensed under the terms of the MIT license. See the [LICENSE](LICENSE.txt) file.
