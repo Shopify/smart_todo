@@ -3,11 +3,15 @@
 require "optionparser"
 
 module SmartTodo
+  # This class is the entrypoint of the SmartTodo library and is responsible
+  # to retrieve the command line options as well as iterating over each files/directories
+  # to run the +CommentParser+ on.
   class CLI
     def initialize
       @options = {}
     end
 
+    # @param args [Array<String>]
     def run(args = ARGV)
       paths = define_options.parse!(args)
       validate_options!
@@ -23,12 +27,16 @@ module SmartTodo
       end
     end
 
+    # @raise [ArgumentError] if the +slack_token+ or the +fallback_channel+
+    #   options are not passed to the command line
+    # @return [void]
     def validate_options!
       @options[:slack_token] ||= ENV.fetch('SMART_TODO_SLACK_TOKEN') { raise(ArgumentError, 'Missing :slack_token') }
 
       @options.fetch(:fallback_channel) { raise(ArgumentError, 'Missing :fallback_channel') }
     end
 
+    # @return [OptionParser] an instance of OptionParser
     def define_options
       OptionParser.new do |opts|
         opts.banner = "Usage: smart_todo [options] file_or_path1 file_or_path2 ..."
@@ -41,6 +49,8 @@ module SmartTodo
       end
     end
 
+    # @param path [String] a path to a file or directory
+    # @return [Array<String>] all the directories the parser should run on
     def normalize_path(path)
       if File.file?(path)
         [path]
@@ -49,6 +59,7 @@ module SmartTodo
       end
     end
 
+    # @param file [String] a path to a file
     def parse_file(file)
       Parser::CommentParser.new(File.read(file, encoding: 'UTF-8')).parse.each do |todo_node|
         event_message = nil
