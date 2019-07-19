@@ -2,7 +2,7 @@
   <img src="https://user-images.githubusercontent.com/8122246/61341925-b936d180-a848-11e9-95c1-0d2f398c51b1.png?raw=true" width="200">
 </h3>
 
-[![Build status](https://badge.buildkite.com/dc3ed74a08ef4a3f6f13bc37bf6ac19a80c0deb3157dfa7937.svg)](https://buildkite.com/shopify/smart-todo?branch=master)
+[![Build Status](https://travis-ci.com/Shopify/smart_todo.svg?branch=master)](https://travis-ci.com/Shopify/smart_todo)
 
 _SmartTodo_  is a library designed to assign users on TODO comments written in your codebase and help assignees be reminded when it's time to commit to their TODO.
 
