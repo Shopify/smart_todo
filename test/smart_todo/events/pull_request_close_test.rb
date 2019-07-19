@@ -10,7 +10,7 @@ module SmartTodo
           .to_return(body: JSON.dump(state: 'closed'))
 
         expected = <<~EOM
-          The Pull Request or Issue *123* in the *rails/rails* repository
+          The Pull Request or Issue https://github.com/rails/rails/pull/123
           is now closed, your TODO is ready to be addressed.
         EOM
         assert_equal(expected, PullRequestClose.new('rails', 'rails', '123').met?)

@@ -39,7 +39,7 @@ module SmartTodo
 
       def message
         <<~EOM
-          The Pull Request or Issue *#{@pr_number}* in the *#{@organization}/#{@repo}* repository
+          The Pull Request or Issue https://github.com/#{@organization}/#{@repo}/pull/#{@pr_number}
           is now closed, your TODO is ready to be addressed.
         EOM
       end
