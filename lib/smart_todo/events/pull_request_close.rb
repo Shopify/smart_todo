@@ -57,10 +57,9 @@ module SmartTodo
       end
 
       def default_headers
-        {
-          'Accept' => 'application/vnd.github.v3+json',
-          'Authorization' => "token #{ENV[TOKEN_ENV]}",
-        }
+        { 'Accept' => 'application/vnd.github.v3+json' }.tap do |headers|
+          headers['Authorization'] = "token #{ENV[TOKEN_ENV]}" if ENV[TOKEN_ENV]
+        end
       end
     end
   end
