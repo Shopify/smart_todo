@@ -37,6 +37,32 @@ module SmartTodo
 
         assert_equal(expected, PullRequestClose.new('rails', 'rails', '123').met?)
       end
+
+      def test_when_token_env_is_not_present
+        stub_request(:get, /api.github.com/)
+          .to_return(body: JSON.dump(state: 'open'))
+
+        assert_equal(false, PullRequestClose.new('rails', 'rails', '123').met?)
+
+        assert_requested(:get, /api.github.com/) do |request|
+          assert(!request.headers.key?('Authorization'))
+        end
+      end
+
+      def test_when_token_env_is_present
+        ENV[PullRequestClose::TOKEN_ENV] = 'abc'
+
+        stub_request(:get, /api.github.com/)
+          .to_return(body: JSON.dump(state: 'open'))
+
+        assert_equal(false, PullRequestClose.new('rails', 'rails', '123').met?)
+
+        assert_requested(:get, /api.github.com/) do |request|
+          assert(request.headers.key?('Authorization'))
+        end
+      ensure
+        ENV.delete(PullRequestClose::TOKEN_ENV)
+      end
     end
   end
 end
