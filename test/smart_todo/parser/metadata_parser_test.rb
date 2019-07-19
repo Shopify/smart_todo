@@ -59,6 +59,19 @@ module SmartTodo
         assert_nil(result.assignee)
       end
 
+      def test_when_a_smart_todo_has_incorrect_ruby_syntax
+        ruby_code = <<~EOM
+          # TODO(A<<+<<)
+          #   Revisit the way we say hello.
+          def hello
+          end
+        EOM
+
+        result = MetadataParser.parse(ruby_code)
+        assert_empty(result.events)
+        assert_nil(result.assignee)
+      end
+
       def test_parse_when_todo_metadata_is_not_ruby_code
         ruby_code = <<~RUBY
           TODO: Do this when done
