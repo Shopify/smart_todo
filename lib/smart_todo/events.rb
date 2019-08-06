@@ -38,15 +38,24 @@ module SmartTodo
       GemRelease.new(gem_name, requirements).met?
     end
 
-    # Check if the Pull Request or issue +pr_number+ is closed
+    # Check if the issue +issue_number+ is closed
+    #
+    # @param organization [String] the GitHub organization name
+    # @param repo [String] the GitHub repo name
+    # @param issue_number [String, Integer]
+    # @return [false, String]
+    def issue_close(organization, repo, issue_number)
+      IssueClose.new(organization, repo, issue_number, type: 'issues').met?
+    end
+
+    # Check if the pull request +pr_number+ is closed
     #
     # @param organization [String] the GitHub organization name
     # @param repo [String] the GitHub repo name
     # @param pr_number [String, Integer]
     # @return [false, String]
     def pull_request_close(organization, repo, pr_number)
-      PullRequestClose.new(organization, repo, pr_number).met?
+      IssueClose.new(organization, repo, pr_number, type: 'pulls').met?
     end
-    alias_method :issue_close, :pull_request_close
   end
 end
