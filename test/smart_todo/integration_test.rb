@@ -64,6 +64,27 @@ module SmartTodo
       )
     end
 
+    def test_sends_a_slack_message_when_issue_close_is_met
+      ruby_code = <<~EOM
+        # TODO(on: issue_close('shopify', 'shopify', 123), to: 'john@example.com')
+        #   Revisit the way we say hello.
+        def hello
+        end
+      EOM
+
+      stub_request(:get, /api.github.com/)
+        .to_return(body: JSON.dump(state: 'closed'))
+
+      generate_ruby_file(ruby_code) do |file|
+        run_cli(file)
+      end
+
+      assert_slack_message_sent(
+        'Hello John',
+        "The Pull Request or Issue https://github.com/shopify/shopify/pull/123\nis now closed"
+      )
+    end
+
     private
 
     def assert_slack_message_sent(*messages)

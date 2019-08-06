@@ -17,8 +17,8 @@ module SmartTodo
       # @param organization [String]
       # @param repo [String]
       # @param pr_number [String, Integer]
-      def initialize(organization, repo, pr_number)
-        @url = "/repos/#{organization}/#{repo}/pulls/#{pr_number}"
+      def initialize(organization, repo, pr_number, type:)
+        @url = "/repos/#{organization}/#{repo}/#{type}/#{pr_number}"
         @organization = organization
         @repo = repo
         @pr_number = pr_number
