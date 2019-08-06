@@ -44,9 +44,9 @@ module SmartTodo
     # @param repo [String] the GitHub repo name
     # @param pr_number [String, Integer]
     # @return [false, String]
-    def pull_request_close(organization, repo, pr_number)
-      PullRequestClose.new(organization, repo, pr_number).met?
+    def issue_close(organization, repo, pr_number)
+      IssueClose.new(organization, repo, pr_number).met?
     end
-    alias_method :issue_close, :pull_request_close
+    alias_method :pull_request_close, :issue_close
   end
 end
