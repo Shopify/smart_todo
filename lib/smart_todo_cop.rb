@@ -29,7 +29,7 @@ module RuboCop
         def smart_todo?(comment)
           metadata = ::SmartTodo::Parser::MetadataParser.parse(comment.gsub(/^#/, ''))
 
-          metadata.events.any?
+          metadata.events.any? && metadata.assignee
         end
       end
     end

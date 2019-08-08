@@ -25,6 +25,15 @@ module SmartTodo
       RUBY
     end
 
+    def test_add_offense_when_todo_has_an_event_but_no_assignee
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
+        def hello
+        end
+      RUBY
+    end
+
     def test_does_not_add_offense_when_todo_is_a_smart_todo
       expect_no_offense(<<~RUBY)
         # TODO(on: date('2019-08-04'), to: 'john@example.com')
