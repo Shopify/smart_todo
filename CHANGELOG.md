@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2019-08-09
+### Fixed
+- Fixed the SmartTodo cop to add an offense in case a SmartTodo has no assignee.
+  ```ruby
+  # Bad
+  #
+  # TODO(on: date('2019-08-08'))
+  ```
+
 ## [1.0.1] - 2019-08-06
 ### Fixed
 - Fixed `issue_close` event making a call to the `pulls/` GH endpoint instead of the `issues/` one
