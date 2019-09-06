@@ -27,13 +27,11 @@ module SmartTodo
       end
     end
 
-    # @raise [ArgumentError] if the +slack_token+ or the +fallback_channel+
-    #   options are not passed to the command line
+    # @raise [ArgumentError] In case an option needed by a dispatcher wasn't provided.
+    #
     # @return [void]
     def validate_options!
-      @options[:slack_token] ||= ENV.fetch('SMART_TODO_SLACK_TOKEN') { raise(ArgumentError, 'Missing :slack_token') }
-
-      @options.fetch(:fallback_channel) { raise(ArgumentError, 'Missing :fallback_channel') }
+      dispatcher.validate_options!(@options)
     end
 
     # @return [OptionParser] an instance of OptionParser
@@ -46,7 +44,15 @@ module SmartTodo
         opts.on('--fallback_channel CHANNEL') do |channel|
           @options[:fallback_channel] = channel
         end
+        opts.on('--dispatcher DISPATCHER') do |dispatcher|
+          @options[:dispatcher] = dispatcher
+        end
       end
+    end
+
+    # @return [Class] a Dispatchers::Base subclass
+    def dispatcher
+      @dispatcher ||= Dispatchers::Base.class_for(@options[:dispatcher])
     end
 
     # @param path [String] a path to a file or directory
@@ -67,7 +73,7 @@ module SmartTodo
           event_message = Events.public_send(event.method_name, *event.arguments)
         end
 
-        Dispatcher.new(event_message, todo_node, file, @options).dispatch if event_met
+        dispatcher.new(event_message, todo_node, file, @options).dispatch if event_met
       end
     end
   end

@@ -6,7 +6,6 @@ require "smart_todo/events"
 module SmartTodo
   autoload :SlackClient,              'smart_todo/slack_client'
   autoload :CLI,                      'smart_todo/cli'
-  autoload :Dispatcher,               'smart_todo/dispatcher'
 
   module Parser
     autoload :CommentParser,          'smart_todo/parser/comment_parser'
@@ -18,5 +17,10 @@ module SmartTodo
     autoload :Date,                   'smart_todo/events/date'
     autoload :GemRelease,             'smart_todo/events/gem_release'
     autoload :IssueClose,             'smart_todo/events/issue_close'
+  end
+
+  module Dispatchers
+    autoload :Base,                   'smart_todo/dispatchers/base'
+    autoload :Slack,                  'smart_todo/dispatchers/slack'
   end
 end
