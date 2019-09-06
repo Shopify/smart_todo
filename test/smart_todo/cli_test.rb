@@ -30,7 +30,7 @@ module SmartTodo
 
       generate_ruby_file(ruby_code) do |file|
         Dispatchers::Slack.stub(:new, mock) do
-          cli.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"'])
+          cli.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"', '--dispatcher', 'slack'])
         end
       end
 

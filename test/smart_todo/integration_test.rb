@@ -108,7 +108,7 @@ module SmartTodo
     def run_cli(file)
       stub_slack_request
 
-      CLI.new.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"'])
+      CLI.new.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"', '--dispatcher', 'slack'])
     end
   end
 end

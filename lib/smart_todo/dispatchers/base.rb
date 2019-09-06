@@ -12,8 +12,8 @@ module SmartTodo
         case dispatcher
         when "slack"
           Slack
-        when nil
-          Slack
+        when nil, 'output'
+          Output
         end
       end
 

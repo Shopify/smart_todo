@@ -22,5 +22,6 @@ module SmartTodo
   module Dispatchers
     autoload :Base,                   'smart_todo/dispatchers/base'
     autoload :Slack,                  'smart_todo/dispatchers/slack'
+    autoload :Output,                 'smart_todo/dispatchers/output'
   end
 end
