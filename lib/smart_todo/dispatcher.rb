@@ -19,12 +19,19 @@ module SmartTodo
 
     # Make a Slack API call to dispatch the message to the user or channel
     #
+    # @raise [SlackClient::Error] in case the Slack API returns an error
+    #   other than `users_not_found`
+    #
     # @return [Hash] the Slack response
     def dispatch
-      user = if email?
-        retrieve_slack_user
+      user = slack_user_or_channel
+
+      client.post_message(user.dig('user', 'id'), slack_message(user))
+    rescue SlackClient::Error => error
+      if %w(users_not_found channel_not_found).include?(error.error_code)
+        user = { 'user' => { 'id' => @options[:fallback_channel] }, 'fallback' => true }
       else
-        { 'user' => { 'id' => @assignee, 'profile' => { 'first_name' => 'Team' } } }
+        raise(error)
       end
 
       client.post_message(user.dig('user', 'id'), slack_message(user))
@@ -32,18 +39,15 @@ module SmartTodo
 
     private
 
-    # Retrieve the unique identifier of a Slack user with his email address
+    # Returns a formatted hash containing either the user id of a slack user or
+    # the channel the message should be sent to.
     #
-    # @return [Hash] the Slack response containing the user ID
-    # @raise [SlackClient::Error] in case the Slack API returns an error
-    #   other than `users_not_found`
-    def retrieve_slack_user
-      client.lookup_user_by_email(@assignee)
-    rescue SlackClient::Error => error
-      if error.error_code == 'users_not_found'
-        { 'user' => { 'id' => @options[:fallback_channel] }, 'fallback' => true }
+    # @return [Hash] a suited hash containing the user ID for a given individual or a slack channel
+    def slack_user_or_channel
+      if email?
+        client.lookup_user_by_email(@assignee)
       else
-        raise(error)
+        { 'user' => { 'id' => @assignee, 'profile' => { 'first_name' => 'Team' } } }
       end
     end
 
@@ -76,7 +80,7 @@ module SmartTodo
     #
     # @return [String]
     def unexisting_user
-      "Hello :wave:,\n\n`#{@assignee}` had an assigned TODO but this user doesn't exist on Slack anymore."
+      "Hello :wave:,\n\n`#{@assignee}` had an assigned TODO but this user or channel doesn't exist on Slack anymore."
     end
 
     # @param user [Hash]

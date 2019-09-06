@@ -37,7 +37,24 @@ module SmartTodo
       assert_requested(:post, /chat.postMessage/) do |request|
         request_body = JSON.parse(request.body)
 
-        assert_match("this user doesn't exist on Slack anymore", request_body['text'])
+        assert_match("this user or channel doesn't exist on Slack anymore", request_body['text'])
+        assert_equal('#general', request_body['channel'])
+      end
+    end
+
+    def test_when_channel_does_not_exist
+      stub_request(:post, /chat.postMessage/)
+        .to_return(body: JSON.dump(ok: false, error: 'channel_not_found'))
+        .then
+        .to_return(body: JSON.dump(ok: true))
+
+      dispatcher = Dispatcher.new('Foo', todo_node('#my_channel'), 'file.rb', @options)
+      dispatcher.dispatch
+
+      assert_requested(:post, /chat.postMessage/, body: /`#my_channel` had an assigned TODO/) do |request|
+        request_body = JSON.parse(request.body)
+
+        assert_match("this user or channel doesn't exist on Slack anymore", request_body['text'])
         assert_equal('#general', request_body['channel'])
       end
     end
