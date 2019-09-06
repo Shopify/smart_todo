@@ -12,8 +12,8 @@ module SmartTodo
         case dispatcher
         when "slack"
           Slack
-        when nil
-          Slack
+        when nil, 'output'
+          Output
         end
       end
 
@@ -59,7 +59,7 @@ module SmartTodo
         header = if user.key?('fallback')
           unexisting_user
         else
-          existing_user(user)
+          existing_user
         end
 
         <<~EOM
@@ -84,8 +84,8 @@ module SmartTodo
       end
 
       # @param user [Hash]
-      def existing_user(user)
-        "Hello #{user.dig('user', 'profile', 'first_name')} :wave:,"
+      def existing_user
+        "Hello :wave:,"
       end
     end
   end

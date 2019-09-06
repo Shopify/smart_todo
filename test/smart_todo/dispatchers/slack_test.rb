@@ -21,7 +21,7 @@ module SmartTodo
         assert_requested(:post, /chat.postMessage/) do |request|
           request_body = JSON.parse(request.body)
 
-          assert_match('Hello John', request_body['text'])
+          refute_match("this user or channel doesn't exist on Slack anymore", request_body['text'])
           assert_equal('ABC', request_body['channel'])
         end
       end
@@ -81,7 +81,7 @@ module SmartTodo
         assert_requested(:post, /chat.postMessage/) do |request|
           request_body = JSON.parse(request.body)
 
-          assert_match('Hello Team', request_body['text'])
+          refute_match("this user or channel doesn't exist on Slack anymore", request_body['text'])
           assert_equal('#my_channel', request_body['channel'])
         end
       end

@@ -17,7 +17,7 @@ module SmartTodo
       end
 
       assert_slack_message_sent(
-        'Hello John',
+        'Hello :wave:,',
         'We are past the *2015-03-01* due date'
       )
     end
@@ -38,7 +38,7 @@ module SmartTodo
       end
 
       assert_slack_message_sent(
-        'Hello John',
+        'Hello :wave:,',
         'The gem *rails* was released to version *5.1.1*'
       )
     end
@@ -59,7 +59,7 @@ module SmartTodo
       end
 
       assert_slack_message_sent(
-        'Hello John',
+        'Hello :wave:,',
         "The Pull Request or Issue https://github.com/shopify/shopify/pull/123\nis now closed"
       )
     end
@@ -80,7 +80,7 @@ module SmartTodo
       end
 
       assert_slack_message_sent(
-        'Hello John',
+        'Hello :wave:,',
         "The Pull Request or Issue https://github.com/shopify/shopify/pull/123\nis now closed"
       )
     end
@@ -108,7 +108,7 @@ module SmartTodo
     def run_cli(file)
       stub_slack_request
 
-      CLI.new.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"'])
+      CLI.new.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"', '--dispatcher', 'slack'])
     end
   end
 end
