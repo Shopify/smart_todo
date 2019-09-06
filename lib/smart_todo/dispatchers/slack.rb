@@ -41,7 +41,7 @@ module SmartTodo
         if email?
           client.lookup_user_by_email(@assignee)
         else
-          { 'user' => { 'id' => @assignee, 'profile' => { 'first_name' => 'Team' } } }
+          { 'user' => { 'id' => @assignee } }
         end
       end
 
