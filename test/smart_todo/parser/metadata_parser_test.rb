@@ -59,6 +59,16 @@ module SmartTodo
         assert_nil(result.assignee)
       end
 
+      def test_parse_when_todo_metadata_on_is_uncorrectly_formatted
+        ruby_code = <<~RUBY
+          TODO(on: '2019-08-04')
+        RUBY
+
+        result = MetadataParser.parse(ruby_code)
+        assert_empty(result.events)
+        assert_nil(result.assignee)
+      end
+
       def test_when_a_smart_todo_has_incorrect_ruby_syntax
         ruby_code = <<~EOM
           # TODO(A<<+<<)

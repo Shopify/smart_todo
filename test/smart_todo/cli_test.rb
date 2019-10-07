@@ -78,5 +78,20 @@ module SmartTodo
     ensure
       Encoding.default_external = previous_encoding
     end
+
+    def test_does_not_crash_if_the_event_is_incorrectly_formated
+      cli = CLI.new
+      ruby_code = <<~EOM
+        # TODO(on: '2010-03-02', to: '#general')
+        def hello
+        end
+      EOM
+
+      generate_ruby_file(ruby_code) do |file|
+        cli.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"'])
+      end
+
+      assert_not_requested(:post, /chat.postMessage/)
+    end
   end
 end

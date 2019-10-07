@@ -103,6 +103,8 @@ module SmartTodo
       # @param method_node [MethodNode]
       # @return [void]
       def on_todo_event(method_node)
+        return unless method_node.is_a?(MethodNode)
+
         events << method_node
       end
 
