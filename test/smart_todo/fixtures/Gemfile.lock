@@ -1,0 +1,50 @@
+PATH
+  remote: .
+  specs:
+    smart_todo (1.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.6.0)
+      public_suffix (>= 2.0.2, < 4.0)
+    ast (2.4.0)
+    crack (0.4.3)
+      safe_yaml (~> 1.0.0)
+    hashdiff (0.4.0)
+    jaro_winkler (1.5.3)
+    minitest (5.11.3)
+    parallel (1.17.0)
+    parser (2.6.3.0)
+      ast (~> 2.4.0)
+    public_suffix (3.1.1)
+    rainbow (3.0.0)
+    rake (10.5.0)
+    rubocop (0.71.0)
+      jaro_winkler (~> 1.5.1)
+      parallel (~> 1.10)
+      parser (>= 2.6)
+      rainbow (>= 2.2.2, < 4.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (>= 1.4.0, < 1.7)
+    ruby-progressbar (1.10.1)
+    safe_yaml (1.0.5)
+    unicode-display_width (1.6.0)
+    webmock (3.6.0)
+      addressable (>= 2.3.6)
+      crack (>= 0.3.2)
+      hashdiff (>= 0.4.0, < 2.0.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (~> 1.17)
+  minitest (~> 5.0)
+  rake (~> 10.0)
+  rubocop (~> 0.71)
+  smart_todo!
+  webmock
+
+BUNDLED WITH
+   1.17.3

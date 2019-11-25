@@ -15,6 +15,7 @@ module SmartTodo
 
   module Events
     autoload :Date,                   'smart_todo/events/date'
+    autoload :GemBump,                'smart_todo/events/gem_bump'
     autoload :GemRelease,             'smart_todo/events/gem_release'
     autoload :IssueClose,             'smart_todo/events/issue_close'
   end

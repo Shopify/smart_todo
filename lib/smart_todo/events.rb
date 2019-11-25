@@ -38,6 +38,15 @@ module SmartTodo
       GemRelease.new(gem_name, requirements).met?
     end
 
+    # Check if +gem_name+ was bumped to the +requirements+ expected
+    #
+    # @param gem_name [String]
+    # @param requirements [Array<String>] a list of version specifiers
+    # @return [false, String]
+    def gem_bump(gem_name, *requirements)
+      GemBump.new(gem_name, requirements).met?
+    end
+
     # Check if the issue +issue_number+ is closed
     #
     # @param organization [String] the GitHub organization name
