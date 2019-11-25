@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2019-11-25
+### Fixed
+- Fixed crash with badly formated TODO(on:) (i.e. `TODO(on: 'blabla'))
+
+### Added
+- Added the `on: gem_bump` event which will remind you when a gem inside your
+  Gemfile.lock snapshot gets updated to a specific version.
+
+  ```ruby
+  # TODO(on: gem_bump('rails', '6.1'), to: '...')
+  ```
+
 ## [1.1.0] - 2019-09-06
 ### Fixed
 - Fixed the SmartTodo cop to add an offense in case a SmartTodo has a wrong event.
