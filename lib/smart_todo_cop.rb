@@ -31,7 +31,7 @@ module RuboCop
 
           metadata.events.any? &&
             metadata.events.all? { |event| event.is_a?(::SmartTodo::Parser::MethodNode) } &&
-            metadata.assignee
+            metadata.assignees.any?
         end
       end
     end

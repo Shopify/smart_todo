@@ -151,7 +151,7 @@ module SmartTodo
 
         todo = CommentParser.new(ruby_code).parse
         assert_equal('date', todo[0].metadata.events[0].method_name)
-        assert_equal('john@example.com', todo[0].metadata.assignee)
+        assert_equal(['john@example.com'], todo[0].metadata.assignees)
       end
     end
   end

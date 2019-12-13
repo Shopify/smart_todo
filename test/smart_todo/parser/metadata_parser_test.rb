@@ -13,7 +13,7 @@ module SmartTodo
         result = MetadataParser.parse(ruby_code)
         assert_equal(1, result.events.size)
         assert_equal('date', result.events[0].method_name)
-        assert_equal('john@example.com', result.assignee)
+        assert_equal(['john@example.com'], result.assignees)
       end
 
       def test_parse_todo_metadata_with_multiple_event
@@ -25,7 +25,7 @@ module SmartTodo
         assert_equal(2, result.events.size)
         assert_equal('date', result.events[0].method_name)
         assert_equal('gem_release', result.events[1].method_name)
-        assert_equal('john@example.com', result.assignee)
+        assert_equal(['john@example.com'], result.assignees)
       end
 
       def test_parse_todo_metadata_with_no_assignee
@@ -35,7 +35,29 @@ module SmartTodo
 
         result = MetadataParser.parse(ruby_code)
         assert_equal('date', result.events[0].method_name)
-        assert_nil(result.assignee)
+        assert_empty(result.assignees)
+      end
+
+      def test_parse_todo_metadata_with_multiple_assignees
+        ruby_code = <<~RUBY
+          TODO(on: something('abc', '123', '456'), to: 'john@example.com', to: 'janne@example.com')
+        RUBY
+
+        result = MetadataParser.parse(ruby_code)
+        assert_equal('something', result.events[0].method_name)
+        assert_equal(['abc', '123', '456'], result.events[0].arguments)
+        assert_equal(['john@example.com', 'janne@example.com'], result.assignees)
+      end
+
+      def test_parse_todo_metadata_with_repeated_assignees
+        ruby_code = <<~RUBY
+          TODO(on: something('abc', '123', '456'), to: 'john@example.com', to: 'john@example.com')
+        RUBY
+
+        result = MetadataParser.parse(ruby_code)
+        assert_equal('something', result.events[0].method_name)
+        assert_equal(['abc', '123', '456'], result.events[0].arguments)
+        assert_equal(['john@example.com', 'john@example.com'], result.assignees)
       end
 
       def test_parse_todo_metadata_with_multiple_arguments
@@ -46,7 +68,7 @@ module SmartTodo
         result = MetadataParser.parse(ruby_code)
         assert_equal('something', result.events[0].method_name)
         assert_equal(['abc', '123', '456'], result.events[0].arguments)
-        assert_equal('john@example.com', result.assignee)
+        assert_equal(['john@example.com'], result.assignees)
       end
 
       def test_parse_when_todo_metadata_is_uncorrectly_formatted
@@ -56,7 +78,7 @@ module SmartTodo
 
         result = MetadataParser.parse(ruby_code)
         assert_empty(result.events)
-        assert_nil(result.assignee)
+        assert_empty(result.assignees)
       end
 
       def test_parse_when_todo_metadata_on_is_uncorrectly_formatted
@@ -66,7 +88,7 @@ module SmartTodo
 
         result = MetadataParser.parse(ruby_code)
         assert_empty(result.events)
-        assert_nil(result.assignee)
+        assert_empty(result.assignees)
       end
 
       def test_when_a_smart_todo_has_incorrect_ruby_syntax
@@ -79,7 +101,7 @@ module SmartTodo
 
         result = MetadataParser.parse(ruby_code)
         assert_empty(result.events)
-        assert_nil(result.assignee)
+        assert_empty(result.assignees)
       end
 
       def test_parse_when_todo_metadata_is_not_ruby_code
@@ -89,7 +111,7 @@ module SmartTodo
 
         result = MetadataParser.parse(ruby_code)
         assert_empty(result.events)
-        assert_nil(result.assignee)
+        assert_empty(result.assignees)
       end
     end
   end
