@@ -38,7 +38,7 @@ module SmartTodo
         @todo_node = todo_node
         @options = options
         @file = file
-        @assignee = @todo_node.metadata.assignee
+        @assignees = @todo_node.metadata.assignees
       end
 
       # This method gets called when a TODO reminder is expired and needs to be delivered.
@@ -54,10 +54,11 @@ module SmartTodo
       # Prepare the content of the message to send to the TODO assignee
       #
       # @param user [Hash] contain information about a user
+      # @param assignee [String] original string handle the slack message should be sent
       # @return [String]
-      def slack_message(user)
+      def slack_message(user, assignee)
         header = if user.key?('fallback')
-          unexisting_user
+          unexisting_user(assignee)
         else
           existing_user
         end
@@ -78,9 +79,10 @@ module SmartTodo
 
       # Message in case a TODO's assignee doesn't exist in the Slack organization
       #
+      # @param user [Hash]
       # @return [String]
-      def unexisting_user
-        "Hello :wave:,\n\n`#{@assignee}` had an assigned TODO but this user or channel doesn't exist on Slack anymore."
+      def unexisting_user(assignee)
+        "Hello :wave:,\n\n`#{assignee}` had an assigned TODO but this user or channel doesn't exist on Slack anymore."
       end
 
       # Hello message for user actually existing in the organization
