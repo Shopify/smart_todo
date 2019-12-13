@@ -83,7 +83,7 @@ module SmartTodo
         "Hello :wave:,\n\n`#{@assignee}` had an assigned TODO but this user or channel doesn't exist on Slack anymore."
       end
 
-      # @param user [Hash]
+      # Hello message for user actually existing in the organization
       def existing_user
         "Hello :wave:,"
       end
