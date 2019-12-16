@@ -86,6 +86,19 @@ module SmartTodo
         end
       end
 
+      def test_when_multiple_assignees
+        stub_request(:post, /chat.postMessage/)
+          .to_return(body: JSON.dump(ok: true))
+
+        dispatcher = Slack.new('Foo', todo_node('#my_channel1', '#my_channel2'), 'file.rb', @options)
+        dispatcher.dispatch
+
+        assert_requested(:post, /chat.postMessage/, times: 2) do |request|
+          request_body = JSON.parse(request.body)
+          assert_includes(['#my_channel1', '#my_channel2'], request_body['channel'])
+        end
+      end
+
       def test_validate_options_when_all_mandatory_options_are_passed
         Slack.validate_options!(slack_token: '123', fallback_channel: '#general')
       end
@@ -119,9 +132,12 @@ module SmartTodo
 
       private
 
-      def todo_node(assignee = 'john@example.com')
+      def todo_node(*assignees)
+        tos = assignees.map { |assignee| "to: '#{assignee}'" }
+        tos << "to: 'john@example.com'" if assignees.empty?
+
         ruby_code = <<~EOM
-          # TODO(on: date('2011-03-02'), to: '#{assignee}')
+          # TODO(on: date('2011-03-02'), #{tos.join(', ')})
           def hello
           end
         EOM

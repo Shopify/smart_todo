@@ -78,10 +78,11 @@ module SmartTodo
     end
 
     class Visitor
-      attr_reader :events, :assignee
+      attr_reader :events, :assignees
 
       def initialize
         @events = []
+        @assignees = []
       end
 
       # Iterate over each tokens returned from the parser and call
@@ -111,7 +112,7 @@ module SmartTodo
       # @param assignee [String]
       # @return [void]
       def on_todo_assignee(assignee)
-        @assignee = assignee
+        @assignees << assignee
       end
     end
   end
