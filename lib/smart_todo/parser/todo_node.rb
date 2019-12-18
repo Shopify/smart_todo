@@ -36,7 +36,7 @@ module SmartTodo
       # @param comment [String]
       # @return [true, false]
       def indented_comment?(comment)
-        comment.match(/^#(\s+)/)[1].size - @start == DEFAULT_RUBY_INDENTATION
+        comment.match(/^#(\s*)/)[1].size - @start == DEFAULT_RUBY_INDENTATION
       end
     end
   end

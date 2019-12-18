@@ -121,6 +121,17 @@ module SmartTodo
         assert_equal('', todo[0].comment)
       end
 
+      def test_parse_todo_with_weird_comment_indentation
+        ruby_code = <<~RUBY
+          # TODO(on: date('2019-08-04'), to: 'john@example.com')
+          #bla
+        RUBY
+
+        todo = CommentParser.new(ruby_code).parse
+        assert_equal(1, todo.size)
+        assert_equal('', todo[0].comment)
+      end
+
       def test_parse_todo_with_nothing_else
         ruby_code = <<~RUBY
           # TODO(on: date('2019-08-04'), to: 'john@example.com')
