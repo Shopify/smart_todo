@@ -1,4 +1,1 @@
-# https://services.shopify.io/services/smart_todo/production
 classification: library
-slack_channels:
-  - rails
