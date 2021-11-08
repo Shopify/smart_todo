@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'net/http'
-require 'json'
+require "net/http"
+require "json"
 
 module SmartTodo
   # A simple client around the Slack API.
@@ -16,7 +16,7 @@ module SmartTodo
 
       # @param response_body [Hash] the parsed response body from Slack
       def initialize(response_body)
-        @error_code = response_body['error']
+        @error_code = response_body["error"]
 
         super("Response body: #{response_body}")
       end
@@ -25,7 +25,7 @@ module SmartTodo
     # @param slack_token [String]
     def initialize(slack_token)
       @slack_token = slack_token
-      @client = Net::HTTP.new('slack.com', Net::HTTP.https_default_port).tap do |client|
+      @client = Net::HTTP.new("slack.com", Net::HTTP.https_default_port).tap do |client|
         client.use_ssl = true
         client.read_timeout = 30
         client.ssl_timeout = 15
@@ -42,7 +42,7 @@ module SmartTodo
     #
     # @see https://api.slack.com/methods/users.lookupByEmail
     def lookup_user_by_email(email)
-      headers = { 'Content-Type' => 'application/x-www-form-urlencoded' }
+      headers = { "Content-Type" => "application/x-www-form-urlencoded" }
 
       request(:get, "/api/users.lookupByEmail?email=#{email}", nil, headers)
     end
@@ -58,7 +58,7 @@ module SmartTodo
     #
     # @see https://api.slack.com/methods/chat.postMessage
     def post_message(channel, text)
-      request(:post, '/api/chat.postMessage', JSON.dump(channel: channel, text: text))
+      request(:post, "/api/chat.postMessage", JSON.dump(channel: channel, text: text))
     end
 
     private
@@ -90,10 +90,10 @@ module SmartTodo
     # @raise [Net::HTTPError] in case the reques to Slack failed
     # @raise [SlackClient::Error] in case Slack returs a { ok: false } in the body
     def slack_response!(response)
-      raise(Net::HTTPError.new('Request to slack failed', response)) unless response.code_type < Net::HTTPSuccess
+      raise(Net::HTTPError.new("Request to slack failed", response)) unless response.code_type < Net::HTTPSuccess
       body = JSON.parse(response.body)
 
-      if body['ok']
+      if body["ok"]
         body
       else
         raise(Error, body)
@@ -105,8 +105,8 @@ module SmartTodo
     # @return [Hash]
     def default_headers
       {
-        'Content-Type' => 'application/json; charset=utf8',
-        'Authorization' => "Bearer #{@slack_token}",
+        "Content-Type" => "application/json; charset=utf8",
+        "Authorization" => "Bearer #{@slack_token}",
       }
     end
   end

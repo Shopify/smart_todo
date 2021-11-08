@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'ripper'
+require "ripper"
 
 module SmartTodo
   module Parser

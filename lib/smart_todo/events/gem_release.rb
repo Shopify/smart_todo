@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'net/http'
-require 'json'
+require "net/http"
+require "json"
 
 module SmartTodo
   module Events
@@ -30,7 +30,7 @@ module SmartTodo
         if response.code_type < Net::HTTPClientError
           error_message
         elsif (gem = version_released?(response.body))
-          message(gem['number'])
+          message(gem["number"])
         else
           false
         end
@@ -54,13 +54,13 @@ module SmartTodo
       # @return [true, false]
       def version_released?(gem_versions)
         JSON.parse(gem_versions).find do |gem|
-          @requirements.satisfied_by?(Gem::Version.new(gem['number']))
+          @requirements.satisfied_by?(Gem::Version.new(gem["number"]))
         end
       end
 
       # @return [Net::HTTP] an instance of Net::HTTP
       def client
-        @client ||= Net::HTTP.new('rubygems.org', Net::HTTP.https_default_port).tap do |client|
+        @client ||= Net::HTTP.new("rubygems.org", Net::HTTP.https_default_port).tap do |client|
           client.use_ssl = true
         end
       end

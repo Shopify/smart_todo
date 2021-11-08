@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'test_helper'
-require 'tempfile'
+require "test_helper"
+require "tempfile"
 
 module SmartTodo
   class CLITest < Minitest::Test
@@ -9,9 +9,9 @@ module SmartTodo
       cli = CLI.new
 
       Dir.stub(:[], []) do
-        paths = cli.run(['--slack_token', '123', '--fallback_channel', '#general"'])
+        paths = cli.run(["--slack_token", "123", "--fallback_channel", '#general"'])
 
-        assert_equal(['.'], paths)
+        assert_equal(["."], paths)
       end
     end
 
@@ -30,7 +30,7 @@ module SmartTodo
 
       generate_ruby_file(ruby_code) do |file|
         Dispatchers::Slack.stub(:new, mock) do
-          cli.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"', '--dispatcher', 'slack'])
+          cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"', "--dispatcher", "slack"])
         end
       end
 
@@ -48,7 +48,7 @@ module SmartTodo
       EOM
 
       generate_ruby_file(ruby_code) do |file|
-        cli.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"'])
+        cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
       end
 
       assert_not_requested(:post, /chat.postMessage/)
@@ -56,7 +56,7 @@ module SmartTodo
 
     def test_ascii_encoded_file_with_utf8_characters_can_be_parsed_correctly
       previous_encoding = Encoding.default_external
-      Encoding.default_external = 'US-ASCII'
+      Encoding.default_external = "US-ASCII"
 
       cli = CLI.new
       ruby_code = <<~EOM
@@ -71,7 +71,7 @@ module SmartTodo
       EOM
 
       generate_ruby_file(ruby_code) do |file|
-        cli.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"'])
+        cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
       end
 
       assert_not_requested(:post, /chat.postMessage/)
@@ -88,7 +88,7 @@ module SmartTodo
       EOM
 
       generate_ruby_file(ruby_code) do |file|
-        cli.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"'])
+        cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
       end
 
       assert_not_requested(:post, /chat.postMessage/)

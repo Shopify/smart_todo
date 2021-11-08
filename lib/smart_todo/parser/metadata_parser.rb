@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'ripper'
+require "ripper"
 
 module SmartTodo
   module Parser
@@ -35,7 +35,7 @@ module SmartTodo
       # @param args [Array]
       # @return [Array, MethodNode]
       def on_method_add_arg(method, args)
-        if method == 'TODO'
+        if method == "TODO"
           args
         else
           MethodNode.new(method, args)
@@ -58,12 +58,12 @@ module SmartTodo
       # @param key [String]
       # @param value [String, Integer, MethodNode]
       def on_assoc_new(key, value)
-        key.tr!(':', '')
+        key.tr!(":", "")
 
         case key
-        when 'on'
+        when "on"
           [:on_todo_event, value]
-        when 'to'
+        when "to"
           [:on_todo_assignee, value]
         else
           [:unknown, value]

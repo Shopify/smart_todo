@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-gem('bundler')
-require 'bundler'
+gem("bundler")
+require "bundler"
 
 module SmartTodo
   module Events

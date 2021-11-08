@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require "test_helper"
 
 module SmartTodo
   module Parser
@@ -105,7 +105,7 @@ module SmartTodo
 
         todo = CommentParser.new(ruby_code).parse
         assert_equal(1, todo.size)
-        assert_equal('', todo[0].comment)
+        assert_equal("", todo[0].comment)
       end
 
       def test_parse_todo_with_unindented_comment
@@ -118,7 +118,7 @@ module SmartTodo
 
         todo = CommentParser.new(ruby_code).parse
         assert_equal(1, todo.size)
-        assert_equal('', todo[0].comment)
+        assert_equal("", todo[0].comment)
       end
 
       def test_parse_todo_with_weird_comment_indentation
@@ -129,7 +129,7 @@ module SmartTodo
 
         todo = CommentParser.new(ruby_code).parse
         assert_equal(1, todo.size)
-        assert_equal('', todo[0].comment)
+        assert_equal("", todo[0].comment)
       end
 
       def test_parse_todo_with_nothing_else
@@ -161,8 +161,8 @@ module SmartTodo
         RUBY
 
         todo = CommentParser.new(ruby_code).parse
-        assert_equal('date', todo[0].metadata.events[0].method_name)
-        assert_equal(['john@example.com'], todo[0].metadata.assignees)
+        assert_equal("date", todo[0].metadata.events[0].method_name)
+        assert_equal(["john@example.com"], todo[0].metadata.assignees)
       end
     end
   end

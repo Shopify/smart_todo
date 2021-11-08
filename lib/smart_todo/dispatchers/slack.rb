@@ -6,9 +6,9 @@ module SmartTodo
     # (using the associated slack email address) or a channel.
     class Slack < Base
       def self.validate_options!(options)
-        options[:slack_token] ||= ENV.fetch('SMART_TODO_SLACK_TOKEN') { raise(ArgumentError, 'Missing :slack_token') }
+        options[:slack_token] ||= ENV.fetch("SMART_TODO_SLACK_TOKEN") { raise(ArgumentError, "Missing :slack_token") }
 
-        options.fetch(:fallback_channel) { raise(ArgumentError, 'Missing :fallback_channel') }
+        options.fetch(:fallback_channel) { raise(ArgumentError, "Missing :fallback_channel") }
       end
 
       # Make a Slack API call to dispatch the message to each assignee
@@ -33,15 +33,15 @@ module SmartTodo
       def dispatch_one(assignee)
         user = slack_user_or_channel(assignee)
 
-        client.post_message(user.dig('user', 'id'), slack_message(user, assignee))
+        client.post_message(user.dig("user", "id"), slack_message(user, assignee))
       rescue SlackClient::Error => error
-        if %w(users_not_found channel_not_found).include?(error.error_code)
-          user = { 'user' => { 'id' => @options[:fallback_channel] }, 'fallback' => true }
+        if ["users_not_found", "channel_not_found"].include?(error.error_code)
+          user = { "user" => { "id" => @options[:fallback_channel] }, "fallback" => true }
         else
           raise(error)
         end
 
-        client.post_message(user.dig('user', 'id'), slack_message(user, assignee))
+        client.post_message(user.dig("user", "id"), slack_message(user, assignee))
       end
 
       private
@@ -54,7 +54,7 @@ module SmartTodo
         if assignee.include?("@")
           client.lookup_user_by_email(assignee)
         else
-          { 'user' => { 'id' => assignee } }
+          { "user" => { "id" => assignee } }
         end
       end
 

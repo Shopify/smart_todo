@@ -3,10 +3,10 @@
 
 $LOAD_PATH.unshift("#{__dir__}/../lib")
 
-require 'smart_todo'
+require "smart_todo"
 
-if ENV['ENABLE_SMART_TODO'] && !ARGV.include?('--dispatcher')
-  ARGV << '--dispatcher' << 'slack'
+if ENV["ENABLE_SMART_TODO"] && !ARGV.include?("--dispatcher")
+  ARGV << "--dispatcher" << "slack"
 end
 
 SmartTodo::CLI.new.run

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'net/http'
-require 'json'
+require "net/http"
+require "json"
 
 module SmartTodo
   module Events
@@ -12,7 +12,7 @@ module SmartTodo
     # with the `repos` scope in the +SMART_TODO_GITHUB_TOKEN+ environment variable
     # is required.
     class IssueClose
-      TOKEN_ENV = 'SMART_TODO_GITHUB_TOKEN'
+      TOKEN_ENV = "SMART_TODO_GITHUB_TOKEN"
 
       # @param organization [String]
       # @param repo [String]
@@ -62,7 +62,7 @@ module SmartTodo
 
       # @return [Net::HTTP] an instance of Net::HTTP
       def client
-        @client ||= Net::HTTP.new('api.github.com', Net::HTTP.https_default_port).tap do |client|
+        @client ||= Net::HTTP.new("api.github.com", Net::HTTP.https_default_port).tap do |client|
           client.use_ssl = true
         end
       end
@@ -72,13 +72,13 @@ module SmartTodo
       #
       # @return [true, false]
       def pull_request_closed?(pull_request)
-        JSON.parse(pull_request)['state'] == 'closed'
+        JSON.parse(pull_request)["state"] == "closed"
       end
 
       # @return [Hash]
       def default_headers
-        { 'Accept' => 'application/vnd.github.v3+json' }.tap do |headers|
-          headers['Authorization'] = "token #{ENV[TOKEN_ENV]}" if ENV[TOKEN_ENV]
+        { "Accept" => "application/vnd.github.v3+json" }.tap do |headers|
+          headers["Authorization"] = "token #{ENV[TOKEN_ENV]}" if ENV[TOKEN_ENV]
         end
       end
     end
