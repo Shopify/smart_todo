@@ -1,25 +1,26 @@
 PATH
   remote: .
   specs:
-    smart_todo (1.1.0)
+    smart_todo (1.2.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.6.0)
-      public_suffix (>= 2.0.2, < 4.0)
+    addressable (2.8.0)
+      public_suffix (>= 2.0.2, < 5.0)
     ast (2.4.0)
-    crack (0.4.3)
-      safe_yaml (~> 1.0.0)
-    hashdiff (0.4.0)
+    crack (0.4.5)
+      rexml
+    hashdiff (1.0.1)
     jaro_winkler (1.5.3)
-    minitest (5.11.3)
+    minitest (5.14.4)
     parallel (1.17.0)
     parser (2.6.3.0)
       ast (~> 2.4.0)
-    public_suffix (3.1.1)
+    public_suffix (4.0.6)
     rainbow (3.0.0)
-    rake (10.5.0)
+    rake (13.0.6)
+    rexml (3.2.5)
     rubocop (0.71.0)
       jaro_winkler (~> 1.5.1)
       parallel (~> 1.10)
@@ -28,9 +29,8 @@ GEM
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 1.7)
     ruby-progressbar (1.10.1)
-    safe_yaml (1.0.5)
     unicode-display_width (1.6.0)
-    webmock (3.6.0)
+    webmock (3.11.2)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
@@ -39,12 +39,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.17)
+  bundler (>= 1.17)
   minitest (~> 5.0)
-  rake (~> 10.0)
+  rake (>= 10.0)
   rubocop (~> 0.71)
   smart_todo!
   webmock
 
 BUNDLED WITH
-   1.17.3
+   2.2.25
