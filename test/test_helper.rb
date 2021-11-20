@@ -10,7 +10,7 @@ require "webmock/minitest"
 module Minitest
   class Test
     def generate_ruby_file(ruby_code)
-      tempfile = Tempfile.open(['file', '.rb']) do |file|
+      tempfile = Tempfile.open(["file", ".rb"]) do |file|
         file.write(ruby_code)
         file.rewind
         file

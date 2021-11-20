@@ -12,7 +12,7 @@ module SmartTodo
         case dispatcher
         when "slack"
           Slack
-        when nil, 'output'
+        when nil, "output"
           Output
         end
       end
@@ -25,7 +25,7 @@ module SmartTodo
       #
       # @return void
       def self.validate_options!(_options)
-        raise(NotImplemetedError, 'subclass responsability')
+        raise(NotImplemetedError, "subclass responsability")
       end
 
       # @param event_message [String] the success message associated
@@ -46,7 +46,7 @@ module SmartTodo
       #
       # @return void
       def dispatch
-        raise(NotImplemetedError, 'subclass responsability')
+        raise(NotImplemetedError, "subclass responsability")
       end
 
       private
@@ -57,7 +57,7 @@ module SmartTodo
       # @param assignee [String] original string handle the slack message should be sent
       # @return [String]
       def slack_message(user, assignee)
-        header = if user.key?('fallback')
+        header = if user.key?("fallback")
           unexisting_user(assignee)
         else
           existing_user

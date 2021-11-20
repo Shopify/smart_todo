@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'smart_todo/parser/metadata_parser'
+require "smart_todo/parser/metadata_parser"
 
 module RuboCop
   module Cop
@@ -11,7 +11,7 @@ module RuboCop
       # @see https://rubocop.readthedocs.io/en/latest/extensions/#loading-extensions
       class SmartTodoCop < Cop
         MSG = "Don't write regular TODO comments. Write SmartTodo compatible syntax comments." \
-              "For more info please look at https://github.com/shopify/smart_todo"
+          "For more info please look at https://github.com/shopify/smart_todo"
 
         # @param processed_source [RuboCop::ProcessedSource]
         # @return [void]
@@ -27,7 +27,7 @@ module RuboCop
         # @param comment [String]
         # @return [true, false]
         def smart_todo?(comment)
-          metadata = ::SmartTodo::Parser::MetadataParser.parse(comment.gsub(/^#/, ''))
+          metadata = ::SmartTodo::Parser::MetadataParser.parse(comment.gsub(/^#/, ""))
 
           metadata.events.any? &&
             metadata.events.all? { |event| event.is_a?(::SmartTodo::Parser::MethodNode) } &&

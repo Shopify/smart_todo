@@ -11,7 +11,7 @@ module SmartTodo
 
       # @param todo [String] the actual Ruby comment
       def initialize(todo)
-        @metadata = MetadataParser.parse(todo.gsub(/^#/, ''))
+        @metadata = MetadataParser.parse(todo.gsub(/^#/, ""))
         @comments = []
         @start = todo.match(/^#(\s+)/)[1].size
       end
@@ -26,7 +26,7 @@ module SmartTodo
       # @param comment [String]
       # @return [void]
       def <<(comment)
-        @comments << comment.gsub(/^#(\s+)/, '')
+        @comments << comment.gsub(/^#(\s+)/, "")
       end
 
       # Check if the +comment+ is indented two spaces below the

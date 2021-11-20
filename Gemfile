@@ -6,6 +6,6 @@ git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
 
 gemspec
 
-group :development do
-  gem 'rubocop', '~> 0.71'
+group :rubocop do
+  gem "rubocop-shopify", require: false
 end

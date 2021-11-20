@@ -54,7 +54,7 @@ module SmartTodo
     # @param issue_number [String, Integer]
     # @return [false, String]
     def issue_close(organization, repo, issue_number)
-      IssueClose.new(organization, repo, issue_number, type: 'issues').met?
+      IssueClose.new(organization, repo, issue_number, type: "issues").met?
     end
 
     # Check if the pull request +pr_number+ is closed
@@ -64,7 +64,7 @@ module SmartTodo
     # @param pr_number [String, Integer]
     # @return [false, String]
     def pull_request_close(organization, repo, pr_number)
-      IssueClose.new(organization, repo, pr_number, type: 'pulls').met?
+      IssueClose.new(organization, repo, pr_number, type: "pulls").met?
     end
   end
 end

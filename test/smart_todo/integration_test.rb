@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'test_helper'
+require "test_helper"
 
 module SmartTodo
   class IntegrationTest < Minitest::Test
@@ -17,8 +17,8 @@ module SmartTodo
       end
 
       assert_slack_message_sent(
-        'Hello :wave:,',
-        'We are past the *2015-03-01* due date'
+        "Hello :wave:,",
+        "We are past the *2015-03-01* due date"
       )
     end
 
@@ -31,15 +31,15 @@ module SmartTodo
       EOM
 
       stub_request(:get, /rubygems.org/)
-        .to_return(body: JSON.dump([{ number: '5.1.1' }]))
+        .to_return(body: JSON.dump([{ number: "5.1.1" }]))
 
       generate_ruby_file(ruby_code) do |file|
         run_cli(file)
       end
 
       assert_slack_message_sent(
-        'Hello :wave:,',
-        'The gem *rails* was released to version *5.1.1*'
+        "Hello :wave:,",
+        "The gem *rails* was released to version *5.1.1*"
       )
     end
 
@@ -52,14 +52,14 @@ module SmartTodo
       EOM
 
       stub_request(:get, /api.github.com/)
-        .to_return(body: JSON.dump(state: 'closed'))
+        .to_return(body: JSON.dump(state: "closed"))
 
       generate_ruby_file(ruby_code) do |file|
         run_cli(file)
       end
 
       assert_slack_message_sent(
-        'Hello :wave:,',
+        "Hello :wave:,",
         "The Pull Request or Issue https://github.com/shopify/shopify/pull/123\nis now closed"
       )
     end
@@ -73,14 +73,14 @@ module SmartTodo
       EOM
 
       stub_request(:get, /api.github.com/)
-        .to_return(body: JSON.dump(state: 'closed'))
+        .to_return(body: JSON.dump(state: "closed"))
 
       generate_ruby_file(ruby_code) do |file|
         run_cli(file)
       end
 
       assert_slack_message_sent(
-        'Hello :wave:,',
+        "Hello :wave:,",
         "The Pull Request or Issue https://github.com/shopify/shopify/pull/123\nis now closed"
       )
     end
@@ -92,14 +92,14 @@ module SmartTodo
         request_body = JSON.parse(request.body)
 
         messages.each do |message|
-          assert_match(message, request_body['text'])
+          assert_match(message, request_body["text"])
         end
       end
     end
 
     def stub_slack_request
       stub_request(:get, /users.lookupByEmail/)
-        .to_return(body: JSON.dump(ok: true, user: { id: 'ABC', profile: { first_name: 'John' } }))
+        .to_return(body: JSON.dump(ok: true, user: { id: "ABC", profile: { first_name: "John" } }))
 
       stub_request(:post, /chat.postMessage/)
         .to_return(body: JSON.dump(ok: true))
@@ -108,7 +108,7 @@ module SmartTodo
     def run_cli(file)
       stub_slack_request
 
-      CLI.new.run([file.path, '--slack_token', '123', '--fallback_channel', '#general"', '--dispatcher', 'slack'])
+      CLI.new.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"', "--dispatcher", "slack"])
     end
   end
 end

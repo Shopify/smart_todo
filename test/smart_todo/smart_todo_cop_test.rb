@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'test_helper'
-require 'rubocop'
-require 'rubocop/rspec/expect_offense'
-require 'smart_todo_cop'
+require "test_helper"
+require "rubocop"
+require "rubocop/rspec/expect_offense"
+require "smart_todo_cop"
 
 module SmartTodo
   class SmartTodoCopTest < Minitest::Test
@@ -63,7 +63,7 @@ module SmartTodo
 
     def expected_message
       "Don't write regular TODO comments. Write SmartTodo compatible syntax comments." \
-              "For more info please look at https://github.com/shopify/smart_todo"
+        "For more info please look at https://github.com/shopify/smart_todo"
     end
 
     def expect_offense(source)
@@ -75,7 +75,7 @@ module SmartTodo
     end
     alias_method :expect_no_offense, :expect_offense
 
-    def investigate(source, ruby_version = 2.5, file = '(file)')
+    def investigate(source, ruby_version = 2.5, file = "(file)")
       processed_source = RuboCop::ProcessedSource.new(source, ruby_version, file)
 
       RuboCop::Cop::Commissioner.new([cop], [], raise_error: true).tap do |commissioner|

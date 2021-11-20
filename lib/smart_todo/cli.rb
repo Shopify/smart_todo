@@ -15,13 +15,13 @@ module SmartTodo
     def run(args = ARGV)
       paths = define_options.parse!(args)
       validate_options!
-      paths << '.' if paths.empty?
+      paths << "." if paths.empty?
 
       paths.each do |path|
         normalize_path(path).each do |file|
           parse_file(file)
 
-          STDOUT.print('.')
+          STDOUT.print(".")
           STDOUT.flush
         end
       end
@@ -38,13 +38,13 @@ module SmartTodo
     def define_options
       OptionParser.new do |opts|
         opts.banner = "Usage: smart_todo [options] file_or_path1 file_or_path2 ..."
-        opts.on('--slack_token TOKEN') do |token|
+        opts.on("--slack_token TOKEN") do |token|
           @options[:slack_token] = token
         end
-        opts.on('--fallback_channel CHANNEL') do |channel|
+        opts.on("--fallback_channel CHANNEL") do |channel|
           @options[:fallback_channel] = channel
         end
-        opts.on('--dispatcher DISPATCHER') do |dispatcher|
+        opts.on("--dispatcher DISPATCHER") do |dispatcher|
           @options[:dispatcher] = dispatcher
         end
       end
@@ -67,7 +67,7 @@ module SmartTodo
 
     # @param file [String] a path to a file
     def parse_file(file)
-      Parser::CommentParser.new(File.read(file, encoding: 'UTF-8')).parse.each do |todo_node|
+      Parser::CommentParser.new(File.read(file, encoding: "UTF-8")).parse.each do |todo_node|
         event_message = nil
         event_met = todo_node.metadata.events.find do |event|
           event_message = Events.public_send(event.method_name, *event.arguments)
