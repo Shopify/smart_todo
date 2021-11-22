@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = spec.homepage + "/releases"
+  spec.metadata["allowed_push_host"] = "https://rubygems.org"
 
   spec.files = Dir.chdir(File.expand_path("..", __FILE__)) do
     %x(git ls-files -z).split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
