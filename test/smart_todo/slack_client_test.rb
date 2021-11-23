@@ -22,7 +22,7 @@ module SmartTodo
       end
     end
 
-    def test_lookup_user_by_email_when_user_does_not_exists
+    def test_lookup_user_by_email_when_user_does_not_exist
       stub_request(:get, /slack.com/)
         .to_return(body: JSON.dump(ok: false, error: "users_not_found"))
 
