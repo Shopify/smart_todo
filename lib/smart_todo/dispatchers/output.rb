@@ -8,7 +8,7 @@ module SmartTodo
 
       # @return void
       def dispatch
-        puts slack_message({})
+        puts slack_message({}, nil)
       end
     end
   end
