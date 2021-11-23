@@ -5,18 +5,36 @@ require "test_helper"
 module SmartTodo
   module Dispatchers
     class OutputTest < Minitest::Test
-      def test_dispatch_prints_the_expected_message
-        dispatcher = Output.new("Foo", todo_node, "file.rb", {})
-        assert_output(/Hello \:wave\:\,/) do
-          dispatcher.dispatch
-        end
+      def setup
+        @options = { fallback_channel: "#general", slack_token: "123" }
+      end
+
+      def test_dispatch
+        dispatcher = Output.new("Foo", todo_node, "file.rb", @options)
+        expected_text = <<~HEREDOC
+          Hello :wave:,
+
+          You have an assigned TODO in the `file.rb` file.
+          Foo
+
+          Here is the associated comment on your TODO:
+
+          ```
+
+          ```
+        HEREDOC
+
+        assert_output(expected_text) { dispatcher.dispatch }
       end
 
       private
 
-      def todo_node
+      def todo_node(*assignees)
+        tos = assignees.map { |assignee| "to: '#{assignee}'" }
+        tos << "to: 'john@example.com'" if assignees.empty?
+
         ruby_code = <<~EOM
-          # TODO(on: date('2011-03-02'), to: 'john@example.com'")
+          # TODO(on: date('2011-03-02'), #{tos.join(", ")})
           def hello
           end
         EOM
