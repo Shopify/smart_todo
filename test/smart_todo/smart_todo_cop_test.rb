@@ -63,7 +63,7 @@ module SmartTodo
 
     def expected_message
       "Don't write regular TODO comments. Write SmartTodo compatible syntax comments." \
-        "For more info please look at https://github.com/shopify/smart_todo"
+        "For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax"
     end
 
     def expect_offense(source)
