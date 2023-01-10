@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "smart_todo/parser/metadata_parser"
+require "smart_todo"
 
 module RuboCop
   module Cop
@@ -10,28 +10,43 @@ module RuboCop
       #
       # @see https://rubocop.readthedocs.io/en/latest/extensions/#loading-extensions
       class SmartTodoCop < Cop
-        MSG = "Don't write regular TODO comments. Write SmartTodo compatible syntax comments. " \
-          "For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax"
+        HELP = "For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax"
+        MSG = "Don't write regular TODO comments. Write SmartTodo compatible syntax comments. #{HELP}"
 
         # @param processed_source [RuboCop::ProcessedSource]
         # @return [void]
         def investigate(processed_source)
           processed_source.comments.each do |comment|
             next unless /^#\sTODO/ =~ comment.text
-            next if smart_todo?(comment.text)
-
-            add_offense(comment)
+            metadata = metadata(comment.text)
+            if !smart_todo?(metadata)
+              add_offense(comment)
+            elsif (methods = invalid_event_methods(metadata.events)).any?
+              add_offense(comment, message: "Invalid event method(s): #{methods.join(", ")}. #{HELP}")
+            end
           end
         end
 
-        # @param comment [String]
-        # @return [true, false]
-        def smart_todo?(comment)
-          metadata = ::SmartTodo::Parser::MetadataParser.parse(comment.gsub(/^#/, ""))
+        private
 
+        # @param comment [String]
+        # @return [SmartTodo::Parser::Visitor]
+        def metadata(comment)
+          ::SmartTodo::Parser::MetadataParser.parse(comment.gsub(/^#/, ""))
+        end
+
+        # @param metadata [SmartTodo::Parser::Visitor]
+        # @return [true, false]
+        def smart_todo?(metadata)
           metadata.events.any? &&
             metadata.events.all? { |event| event.is_a?(::SmartTodo::Parser::MethodNode) } &&
             metadata.assignees.any?
+        end
+
+        # @param metadata [Array<SmartTodo::Parser::MethodNode>]
+        # @return [Array<String>]
+        def invalid_event_methods(events)
+          events.map(&:method_name).reject { |method| ::SmartTodo::Events.respond_to?(method) }
         end
       end
     end
