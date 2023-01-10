@@ -43,6 +43,15 @@ module SmartTodo
       RUBY
     end
 
+    def test_add_offense_when_todo_event_is_not_a_valid_method
+      expect_offense(<<~RUBY)
+        # TODO(on: data('2019-08-04'), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Invalid event method(s): data. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
     def test_does_not_add_offense_when_todo_is_a_smart_todo
       expect_no_offense(<<~RUBY)
         # TODO(on: date('2019-08-04'), to: 'john@example.com')
@@ -62,8 +71,8 @@ module SmartTodo
     private
 
     def expected_message
-      "Don't write regular TODO comments. Write SmartTodo compatible syntax comments." \
-        "For more info please look at https://github.com/shopify/smart_todo"
+      "Don't write regular TODO comments. Write SmartTodo compatible syntax comments. " \
+        "For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax"
     end
 
     def expect_offense(source)
