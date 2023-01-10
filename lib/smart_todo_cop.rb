@@ -10,7 +10,7 @@ module RuboCop
       #
       # @see https://rubocop.readthedocs.io/en/latest/extensions/#loading-extensions
       class SmartTodoCop < Cop
-        MSG = "Don't write regular TODO comments. Write SmartTodo compatible syntax comments." \
+        MSG = "Don't write regular TODO comments. Write SmartTodo compatible syntax comments. " \
           "For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax"
 
         # @param processed_source [RuboCop::ProcessedSource]
