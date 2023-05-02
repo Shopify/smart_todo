@@ -66,5 +66,13 @@ module SmartTodo
     def pull_request_close(organization, repo, pr_number)
       IssueClose.new(organization, repo, pr_number, type: "pulls").met?
     end
+
+    # Check if the installed ruby version meets requirements.
+    #
+    # @param requirements [Array<String>] a list of version specifiers
+    # @return [false, String]
+    def ruby_version(*requirements)
+      RubyVersion.new(requirements).met?
+    end
   end
 end

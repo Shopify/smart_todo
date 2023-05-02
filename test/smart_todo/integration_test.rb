@@ -85,6 +85,25 @@ module SmartTodo
       )
     end
 
+    def test_sends_a_slack_message_when_ruby_version_is_met
+      ruby_code = <<~EOM
+        # TODO(on: ruby_version('< 100.0.0'), to: 'john@example.com')
+        #   Upgrade some gem.
+        def hello
+        end
+      EOM
+
+      generate_ruby_file(ruby_code) do |file|
+        run_cli(file)
+      end
+
+      assert_slack_message_sent(
+        "Hello :wave:,",
+        "The currently installed verion of Ruby 3.2.0 is < 100.0.0.",
+        "Upgrade some gem."
+      )
+    end
+
     private
 
     def assert_slack_message_sent(*messages)
