@@ -78,11 +78,12 @@ module SmartTodo
     end
 
     class Visitor
-      attr_reader :events, :assignees
+      attr_reader :events, :assignees, :errors
 
       def initialize
         @events = []
         @assignees = []
+        @errors = []
       end
 
       # Iterate over each tokens returned from the parser and call
@@ -104,9 +105,11 @@ module SmartTodo
       # @param method_node [MethodNode]
       # @return [void]
       def on_todo_event(method_node)
-        return unless method_node.is_a?(MethodNode)
-
-        events << method_node
+        if method_node.is_a?(MethodNode)
+          errors << "Incorrect `:on` event format: #{method_node}"
+        else
+          events << method_node
+        end
       end
 
       # @param assignee [String]

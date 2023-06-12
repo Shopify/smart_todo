@@ -28,7 +28,7 @@ module SmartTodo
     def test_add_offense_when_todo_has_an_invalid_event
       expect_offense(<<~RUBY)
         # TODO(on: '2019-08-04', to: 'john@example.com')
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Invalid TODO format: Incorrect `:on` event format: 2019-08-04. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
         def hello
         end
       RUBY

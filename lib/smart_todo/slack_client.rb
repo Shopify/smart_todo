@@ -82,7 +82,7 @@ module SmartTodo
       slack_response!(response)
     end
 
-    # Chech if the response to Slack was a 200 and the Slack API request was successful
+    # Check if the response to Slack was a 200 and the Slack API request was successful
     #
     # @param response [Net::HTTPResponse] a net Net::HTTPResponse subclass
     #   (Net::HTTPOK, Net::HTTPNotFound ...)

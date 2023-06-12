@@ -81,10 +81,12 @@ module SmartTodo
           event_message = Events.public_send(event.method_name, *event.arguments)
         end
 
+        @errors.concat(todo_node.metadata.errors)
+
         dispatcher.new(event_message, todo_node, file, @options).dispatch if event_met
-      rescue => e
-        @errors << "Error while parsing #{file}: #{e.message}"
       end
+    rescue => e
+      @errors << "Error while parsing #{file}: #{e.message}"
     end
   end
 end
