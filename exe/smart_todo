@@ -9,4 +9,4 @@ if ENV["ENABLE_SMART_TODO"] && !ARGV.include?("--dispatcher")
   ARGV << "--dispatcher" << "slack"
 end
 
-SmartTodo::CLI.new.run
+exit SmartTodo::CLI.new.run

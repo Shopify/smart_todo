@@ -9,9 +9,14 @@ module SmartTodo
       cli = CLI.new
 
       Dir.stub(:[], []) do
-        paths = cli.run(["--slack_token", "123", "--fallback_channel", '#general"'])
+        check_path = -> (path) do
+          assert_equal ".", path
+          []
+        end
 
-        assert_equal(["."], paths)
+        cli.stub(:normalize_path, check_path) do
+          assert_equal 0, cli.run(["--slack_token", "123", "--fallback_channel", '#general"'])
+        end
       end
     end
 
@@ -30,7 +35,7 @@ module SmartTodo
 
       generate_ruby_file(ruby_code) do |file|
         Dispatchers::Slack.stub(:new, mock) do
-          cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"', "--dispatcher", "slack"])
+          assert_equal 0, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"', "--dispatcher", "slack"])
         end
       end
 
@@ -48,7 +53,7 @@ module SmartTodo
       EOM
 
       generate_ruby_file(ruby_code) do |file|
-        cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
+        assert_equal 0, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
       end
 
       assert_not_requested(:post, /chat.postMessage/)
@@ -71,7 +76,7 @@ module SmartTodo
       EOM
 
       generate_ruby_file(ruby_code) do |file|
-        cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
+        assert_equal 0, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
       end
 
       assert_not_requested(:post, /chat.postMessage/)
@@ -88,7 +93,7 @@ module SmartTodo
       EOM
 
       generate_ruby_file(ruby_code) do |file|
-        cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
+        assert_equal 0, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
       end
 
       assert_not_requested(:post, /chat.postMessage/)

@@ -15,6 +15,7 @@ module SmartTodo
     def run(args = ARGV)
       paths = define_options.parse!(args)
       validate_options!
+
       paths << "." if paths.empty?
 
       paths.each do |path|
@@ -25,6 +26,8 @@ module SmartTodo
           STDOUT.flush
         end
       end
+
+      0
     end
 
     # @raise [ArgumentError] In case an option needed by a dispatcher wasn't provided.
