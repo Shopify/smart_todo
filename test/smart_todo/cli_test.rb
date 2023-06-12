@@ -9,14 +9,14 @@ module SmartTodo
       cli = CLI.new
 
       Dir.stub(:[], []) do
-        check_path = -> (path) do
-          assert_equal ".", path
+        check_path = ->(path) do
+          assert_equal(".", path)
           []
         end
 
         cli.stub(:normalize_path, check_path) do
           assert_output("") do
-            assert_equal 0, cli.run(["--slack_token", "123", "--fallback_channel", '#general"'])
+            assert_equal(0, cli.run(["--slack_token", "123", "--fallback_channel", '#general"']))
           end
         end
       end
@@ -38,7 +38,10 @@ module SmartTodo
       generate_ruby_file(ruby_code) do |file|
         Dispatchers::Slack.stub(:new, mock) do
           assert_output(".") do
-            assert_equal 0, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"', "--dispatcher", "slack"])
+            assert_equal(
+              0,
+              cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"', "--dispatcher", "slack"]),
+            )
           end
         end
       end
@@ -58,7 +61,7 @@ module SmartTodo
 
       generate_ruby_file(ruby_code) do |file|
         assert_output(".") do
-          assert_equal 0, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
+          assert_equal(0, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"']))
         end
       end
 
@@ -83,7 +86,7 @@ module SmartTodo
 
       generate_ruby_file(ruby_code) do |file|
         assert_output(".") do
-          assert_equal 0, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
+          assert_equal(0, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"']))
         end
       end
 
@@ -102,7 +105,7 @@ module SmartTodo
 
       generate_ruby_file(ruby_code) do |file|
         assert_output(".", /Incorrect `:on` event format: 2010-03-02/) do
-          assert_equal 1, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
+          assert_equal(1, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"']))
         end
       end
 
@@ -119,7 +122,7 @@ module SmartTodo
 
       generate_ruby_file(ruby_code) do |file|
         assert_output(".", /Error while parsing .* on event `date` with arguments \["2010"\]: argument out of range/) do
-          assert_equal 1, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
+          assert_equal(1, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"']))
         end
       end
     end
@@ -133,8 +136,11 @@ module SmartTodo
       EOM
 
       generate_ruby_file(ruby_code) do |file|
-        assert_output(".", /Error while parsing .* on event `issue_close` with arguments \["211"\]: wrong number of arguments \(given 1, expected 3\)/) do
-          assert_equal 1, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
+        assert_output(
+          ".",
+          /Error while parsing .* on event `issue_close` with arguments \["211"\]: wrong number of arguments \(given 1, expected 3\)/, # rubocop:disable Layout/LineLength
+        ) do
+          assert_equal(1, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"']))
         end
       end
     end

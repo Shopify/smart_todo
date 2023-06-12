@@ -53,7 +53,7 @@ module SmartTodo
 
       def fake_bundler_specs
         @fake_bundler_specs ||= Bundler::SpecSet.new(
-          Bundler::LockfileParser.new(Bundler.read_file("test/smart_todo/fixtures/Gemfile.lock")).specs
+          Bundler::LockfileParser.new(Bundler.read_file("test/smart_todo/fixtures/Gemfile.lock")).specs,
         )
       end
     end

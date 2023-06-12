@@ -3,5 +3,7 @@ inherit_gem:
 
 AllCops:
   TargetRubyVersion: 3.0
+  NewCops: disable
+  SuggestExtensions: false
   Exclude:
     - vendor/**/*

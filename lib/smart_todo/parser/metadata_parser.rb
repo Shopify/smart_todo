@@ -18,10 +18,12 @@ module SmartTodo
 
     # This class is used to parse the ruby TODO() comment.
     class MetadataParser < Ripper
-      # @param source [String] the actual Ruby code
-      def self.parse(source)
-        sexp = new(source).parse
-        Visitor.new.tap { |v| v.process(sexp) }
+      class << self
+        # @param source [String] the actual Ruby code
+        def parse(source)
+          sexp = new(source).parse
+          Visitor.new.tap { |v| v.process(sexp) }
+        end
       end
 
       # @return [Array] an Array of Array

@@ -86,7 +86,10 @@ module SmartTodo
         event_met = todo_node.metadata.events.find do |event|
           event_message = Events.public_send(event.method_name, *event.arguments)
         rescue => e
-          @errors << "Error while parsing #{file} on event `#{event.method_name}` with arguments #{event.arguments}: #{e.message}"
+          message = "Error while parsing #{file} on event `#{event.method_name}` with arguments #{event.arguments}: " \
+            "#{e.message}"
+
+          @errors << message
 
           nil
         end

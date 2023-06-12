@@ -18,6 +18,7 @@ module RuboCop
         def investigate(processed_source)
           processed_source.comments.each do |comment|
             next unless /^#\sTODO/ =~ comment.text
+
             metadata = metadata(comment.text)
 
             if metadata.errors.any?
