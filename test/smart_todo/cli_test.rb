@@ -98,5 +98,18 @@ module SmartTodo
 
       assert_not_requested(:post, /chat.postMessage/)
     end
+
+    def test_exist_with_error_when_files_can_not_be_parsed
+      cli = CLI.new
+      ruby_code = <<~EOM
+        # TODO(on: date(2010-03-02), to: '#general')
+        def hello
+        end
+      EOM
+
+      generate_ruby_file(ruby_code) do |file|
+        assert_equal 1, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"'])
+      end
+    end
   end
 end

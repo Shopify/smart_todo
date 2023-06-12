@@ -9,6 +9,7 @@ module SmartTodo
   class CLI
     def initialize
       @options = {}
+      @errors = []
     end
 
     # @param args [Array<String>]
@@ -27,7 +28,11 @@ module SmartTodo
         end
       end
 
-      0
+      if @errors.empty?
+        0
+      else
+        1
+      end
     end
 
     # @raise [ArgumentError] In case an option needed by a dispatcher wasn't provided.
@@ -77,6 +82,8 @@ module SmartTodo
         end
 
         dispatcher.new(event_message, todo_node, file, @options).dispatch if event_met
+      rescue => e
+        @errors << "Error while parsing #{file}: #{e.message}"
       end
     end
   end
