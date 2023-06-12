@@ -106,9 +106,9 @@ module SmartTodo
       # @return [void]
       def on_todo_event(method_node)
         if method_node.is_a?(MethodNode)
-          errors << "Incorrect `:on` event format: #{method_node}"
-        else
           events << method_node
+        else
+          errors << "Incorrect `:on` event format: #{method_node}"
         end
       end
 
