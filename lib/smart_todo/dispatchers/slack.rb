@@ -35,7 +35,7 @@ module SmartTodo
 
         client.post_message(user.dig("user", "id"), slack_message(user, assignee))
       rescue SlackClient::Error => error
-        if ["users_not_found", "channel_not_found"].include?(error.error_code)
+        if ["users_not_found", "channel_not_found", "is_archived"].include?(error.error_code)
           user = { "user" => { "id" => @options[:fallback_channel] }, "fallback" => true }
         else
           raise(error)
