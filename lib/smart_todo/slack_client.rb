@@ -82,7 +82,7 @@ module SmartTodo
       slack_response!(response)
     end
 
-    # Chech if the response to Slack was a 200 and the Slack API request was successful
+    # Check if the response to Slack was a 200 and the Slack API request was successful
     #
     # @param response [Net::HTTPResponse] a net Net::HTTPResponse subclass
     #   (Net::HTTPOK, Net::HTTPNotFound ...)
@@ -92,6 +92,7 @@ module SmartTodo
     # @raise [SlackClient::Error] in case Slack returns a { ok: false } in the body
     def slack_response!(response)
       raise(Net::HTTPError.new("Request to slack failed", response)) unless response.code_type < Net::HTTPSuccess
+
       body = JSON.parse(response.body)
 
       if body["ok"]

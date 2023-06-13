@@ -3,29 +3,31 @@
 module SmartTodo
   module Dispatchers
     class Base
-      # Factory pattern to retrive the right dispatcher class.
-      #
-      # @param dispatcher [String]
-      #
-      # @return [Class]
-      def self.class_for(dispatcher)
-        case dispatcher
-        when "slack"
-          Slack
-        when nil, "output"
-          Output
+      class << self
+        # Factory pattern to retrieve the right dispatcher class.
+        #
+        # @param dispatcher [String]
+        #
+        # @return [Class]
+        def class_for(dispatcher)
+          case dispatcher
+          when "slack"
+            Slack
+          when nil, "output"
+            Output
+          end
         end
-      end
 
-      # Subclasses should define what options from the CLI they need in order
-      # to properly deliver the message. For instance the Slack dispatcher
-      # requires an API key.
-      #
-      # @param _options [Hash]
-      #
-      # @return void
-      def self.validate_options!(_options)
-        raise(NotImplemetedError, "subclass responsability")
+        # Subclasses should define what options from the CLI they need in order
+        # to properly deliver the message. For instance the Slack dispatcher
+        # requires an API key.
+        #
+        # @param _options [Hash]
+        #
+        # @return void
+        def validate_options!(_options)
+          raise(NotImplemetedError, "subclass responsability")
+        end
       end
 
       # @param event_message [String] the success message associated

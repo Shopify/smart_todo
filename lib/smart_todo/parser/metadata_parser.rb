@@ -18,10 +18,12 @@ module SmartTodo
 
     # This class is used to parse the ruby TODO() comment.
     class MetadataParser < Ripper
-      # @param source [String] the actual Ruby code
-      def self.parse(source)
-        sexp = new(source).parse
-        Visitor.new.tap { |v| v.process(sexp) }
+      class << self
+        # @param source [String] the actual Ruby code
+        def parse(source)
+          sexp = new(source).parse
+          Visitor.new.tap { |v| v.process(sexp) }
+        end
       end
 
       # @return [Array] an Array of Array
@@ -78,11 +80,12 @@ module SmartTodo
     end
 
     class Visitor
-      attr_reader :events, :assignees
+      attr_reader :events, :assignees, :errors
 
       def initialize
         @events = []
         @assignees = []
+        @errors = []
       end
 
       # Iterate over each tokens returned from the parser and call
@@ -104,9 +107,11 @@ module SmartTodo
       # @param method_node [MethodNode]
       # @return [void]
       def on_todo_event(method_node)
-        return unless method_node.is_a?(MethodNode)
-
-        events << method_node
+        if method_node.is_a?(MethodNode)
+          events << method_node
+        else
+          errors << "Incorrect `:on` event format: #{method_node}"
+        end
       end
 
       # @param assignee [String]

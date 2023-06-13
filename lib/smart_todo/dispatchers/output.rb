@@ -4,7 +4,9 @@ module SmartTodo
   module Dispatchers
     # A simple dispatcher that will output the reminder.
     class Output < Base
-      def self.validate_options!(_); end
+      class << self
+        def validate_options!(_); end
+      end
 
       # @return void
       def dispatch

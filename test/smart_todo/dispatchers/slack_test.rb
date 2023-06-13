@@ -60,6 +60,23 @@ module SmartTodo
         end
       end
 
+      def test_when_channel_is_archived
+        stub_request(:post, /chat.postMessage/)
+          .to_return(body: JSON.dump(ok: false, error: "is_archived"))
+          .then
+          .to_return(body: JSON.dump(ok: true))
+
+        dispatcher = Slack.new("Foo", todo_node("#my_channel"), "file.rb", @options)
+        dispatcher.dispatch
+
+        assert_requested(:post, /chat.postMessage/, body: /`#my_channel` had an assigned TODO/) do |request|
+          request_body = JSON.parse(request.body)
+
+          assert_match("this user or channel doesn't exist on Slack anymore", request_body["text"])
+          assert_equal("#general", request_body["channel"])
+        end
+      end
+
       def test_raises_when_lookup_by_email_fails
         stub_request(:get, /users.lookupByEmail/)
           .to_return(body: JSON.dump(ok: false, error: "fatal_error"))

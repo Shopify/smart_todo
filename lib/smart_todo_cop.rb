@@ -18,8 +18,12 @@ module RuboCop
         def investigate(processed_source)
           processed_source.comments.each do |comment|
             next unless /^#\sTODO/ =~ comment.text
+
             metadata = metadata(comment.text)
-            if !smart_todo?(metadata)
+
+            if metadata.errors.any?
+              add_offense(comment, message: "Invalid TODO format: #{metadata.errors.join(", ")}. #{HELP}")
+            elsif !smart_todo?(metadata)
               add_offense(comment)
             elsif (methods = invalid_event_methods(metadata.events)).any?
               add_offense(comment, message: "Invalid event method(s): #{methods.join(", ")}. #{HELP}")

@@ -24,6 +24,8 @@ Gem::Specification.new do |spec|
   spec.metadata["changelog_uri"] = spec.homepage + "/releases"
   spec.metadata["allowed_push_host"] = "https://rubygems.org"
 
+  spec.required_ruby_version = ">= 3.0.0"
+
   spec.files = Dir.chdir(File.expand_path("..", __FILE__)) do
     %x(git ls-files -z).split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   end

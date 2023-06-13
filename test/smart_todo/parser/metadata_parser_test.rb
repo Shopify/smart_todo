@@ -87,8 +87,8 @@ module SmartTodo
         RUBY
 
         result = MetadataParser.parse(ruby_code)
-        assert_empty(result.events)
-        assert_empty(result.assignees)
+
+        assert_equal(["Incorrect `:on` event format: 2019-08-04"], result.errors)
       end
 
       def test_when_a_smart_todo_has_incorrect_ruby_syntax

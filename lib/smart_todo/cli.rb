@@ -9,21 +9,35 @@ module SmartTodo
   class CLI
     def initialize
       @options = {}
+      @errors = []
     end
 
     # @param args [Array<String>]
     def run(args = ARGV)
       paths = define_options.parse!(args)
       validate_options!
+
       paths << "." if paths.empty?
 
       paths.each do |path|
         normalize_path(path).each do |file|
           parse_file(file)
 
-          STDOUT.print(".")
-          STDOUT.flush
+          $stdout.print(".")
+          $stdout.flush
         end
+      end
+
+      if @errors.empty?
+        0
+      else
+        $stderr.puts "There were errors while checking for TODOs:\n"
+
+        @errors.each do |error|
+          $stderr.puts error
+        end
+
+        1
       end
     end
 
@@ -71,7 +85,16 @@ module SmartTodo
         event_message = nil
         event_met = todo_node.metadata.events.find do |event|
           event_message = Events.public_send(event.method_name, *event.arguments)
+        rescue => e
+          message = "Error while parsing #{file} on event `#{event.method_name}` with arguments #{event.arguments}: " \
+            "#{e.message}"
+
+          @errors << message
+
+          nil
         end
+
+        @errors.concat(todo_node.metadata.errors)
 
         dispatcher.new(event_message, todo_node, file, @options).dispatch if event_met
       end

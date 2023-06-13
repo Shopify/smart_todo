@@ -5,10 +5,12 @@ module SmartTodo
     # Dispatcher that sends TODO reminders on Slack. Assignees can be either individual
     # (using the associated slack email address) or a channel.
     class Slack < Base
-      def self.validate_options!(options)
-        options[:slack_token] ||= ENV.fetch("SMART_TODO_SLACK_TOKEN") { raise(ArgumentError, "Missing :slack_token") }
+      class << self
+        def validate_options!(options)
+          options[:slack_token] ||= ENV.fetch("SMART_TODO_SLACK_TOKEN") { raise(ArgumentError, "Missing :slack_token") }
 
-        options.fetch(:fallback_channel) { raise(ArgumentError, "Missing :fallback_channel") }
+          options.fetch(:fallback_channel) { raise(ArgumentError, "Missing :fallback_channel") }
+        end
       end
 
       # Make a Slack API call to dispatch the message to each assignee
@@ -35,7 +37,7 @@ module SmartTodo
 
         client.post_message(user.dig("user", "id"), slack_message(user, assignee))
       rescue SlackClient::Error => error
-        if ["users_not_found", "channel_not_found"].include?(error.error_code)
+        if ["users_not_found", "channel_not_found", "is_archived"].include?(error.error_code)
           user = { "user" => { "id" => @options[:fallback_channel] }, "fallback" => true }
         else
           raise(error)
