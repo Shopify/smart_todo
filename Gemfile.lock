@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    smart_todo (1.4.3)
+    smart_todo (1.5.0)
       rexml
 
 GEM
