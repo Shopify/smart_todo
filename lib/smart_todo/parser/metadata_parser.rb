@@ -37,7 +37,7 @@ module SmartTodo
       # @param args [Array]
       # @return [Array, MethodNode]
       def on_method_add_arg(method, args)
-        if method == "TODO"
+        if method.start_with?(/TODO\W?/)
           args
         else
           MethodNode.new(method, args)

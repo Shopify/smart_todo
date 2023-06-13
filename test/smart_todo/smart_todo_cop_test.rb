@@ -68,6 +68,13 @@ module SmartTodo
       RUBY
     end
 
+    def test_add_offense_when_todo_has_question_mark
+      expect_offense(<<~RUBY)
+        # TODO?
+        ^^^^^^^ #{expected_message}
+      RUBY
+    end
+
     private
 
     def expected_message
