@@ -18,6 +18,7 @@ module SmartTodo
     autoload :GemBump,                "smart_todo/events/gem_bump"
     autoload :GemRelease,             "smart_todo/events/gem_release"
     autoload :IssueClose,             "smart_todo/events/issue_close"
+    autoload :RubyVersion,            "smart_todo/events/ruby_version"
   end
 
   module Dispatchers
