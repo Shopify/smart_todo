@@ -23,7 +23,7 @@ module SmartTodo
       # @param installed_ruby_version [String], requirements [String]
       # @return [String]
       def message(installed_ruby_version)
-        "The currently installed verion of Ruby #{installed_ruby_version} is #{@requirements}."
+        "The currently installed version of Ruby #{installed_ruby_version} is #{@requirements}."
       end
 
       private

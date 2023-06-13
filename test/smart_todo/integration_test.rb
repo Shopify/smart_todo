@@ -99,8 +99,8 @@ module SmartTodo
 
       assert_slack_message_sent(
         "Hello :wave:,",
-        "The currently installed verion of Ruby 3.2.0 is < 100.0.0.",
-        "Upgrade some gem."
+        "The currently installed version of Ruby #{RUBY_VERSION} is < 100.0.0.",
+        "Upgrade some gem.",
       )
     end
 
