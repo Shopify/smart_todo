@@ -62,6 +62,39 @@ module SmartTodo
         end
       end
 
+      def test_when_org_token_env_is_present
+        with_env(
+          IssueClose::TOKEN_ENV + "__RAILS" => "abcd",
+          IssueClose::TOKEN_ENV => "abc",
+        ) do
+          stub_request(:get, /api.github.com/)
+            .to_return(body: JSON.dump(state: "open"))
+
+          assert_equal(false, IssueClose.new("rails", "rails", "123", type: "pulls").met?)
+
+          assert_requested(:get, /api.github.com/) do |request|
+            assert_equal("token abcd", request.headers["Authorization"])
+          end
+        end
+      end
+
+      def test_when_repo_org_token_env_is_present
+        with_env(
+          IssueClose::TOKEN_ENV + "__SHOPIFY__SMART_TODO" => "abcde",
+          IssueClose::TOKEN_ENV + "__SHOPIFY" => "abcd",
+          IssueClose::TOKEN_ENV => "abc",
+        ) do
+          stub_request(:get, /api.github.com/)
+            .to_return(body: JSON.dump(state: "open"))
+
+          assert_equal(false, IssueClose.new("Shopify", "smart-todo", "123", type: "pulls").met?)
+
+          assert_requested(:get, /api.github.com/) do |request|
+            assert_equal("token abcde", request.headers["Authorization"])
+          end
+        end
+      end
+
       def test_calls_the_right_endpoint_when_type_is_pull_request
         expected_endpoint = "https://api.github.com/repos/rails/rails/pulls/123"
         stub_request(:get, expected_endpoint)
