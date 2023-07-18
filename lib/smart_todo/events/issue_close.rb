@@ -11,6 +11,11 @@ module SmartTodo
     # If the Pull Request or Issue is on a private repository, exporting a token
     # with the `repos` scope in the +SMART_TODO_GITHUB_TOKEN+ environment variable
     # is required.
+    #
+    # You can also set a per-org or per-repo token by exporting more specific environment variables:
+    # +SMART_TODO_GITHUB_TOKEN__<ORG>+ and +SMART_TODO_GITHUB_TOKEN__<ORG>__<REPO>+
+    # The +<ORG>+ and +<REPO>+ parts should be uppercased and use underscores.
+    # For example, +Shopify/my-repo+ would become +SMART_TODO_GITHUB_TOKEN__SHOPIFY__MY_REPO=...+.
     class IssueClose
       TOKEN_ENV = "SMART_TODO_GITHUB_TOKEN"
 
@@ -78,8 +83,30 @@ module SmartTodo
       # @return [Hash]
       def default_headers
         { "Accept" => "application/vnd.github.v3+json" }.tap do |headers|
-          headers["Authorization"] = "token #{ENV[TOKEN_ENV]}" if ENV[TOKEN_ENV]
+          token = authorization_token
+          headers["Authorization"] = "token #{token}" if token
         end
+      end
+
+      # @return [String, nil]
+      def authorization_token
+        # Will look in order for:
+        # SMART_TODO_GITHUB_TOKEN__ORG__REPO
+        # SMART_TODO_GITHUB_TOKEN__ORG
+        # SMART_TODO_GITHUB_TOKEN
+        parts = [
+          TOKEN_ENV,
+          @organization.upcase.gsub(/[^A-Z0-9]/, "_"),
+          @repo.upcase.gsub(/[^A-Z0-9]/, "_"),
+        ]
+
+        (parts.size - 1).downto(0).each do |i|
+          key = parts[0..i].join("__")
+          token = ENV[key]
+          return token unless token.nil? || token.empty?
+        end
+
+        nil
       end
     end
   end
