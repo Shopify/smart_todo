@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+gem("bundler")
+require "bundler"
+require "net/http"
+require "time"
+require "json"
+
 module SmartTodo
   # This module contains all the methods accessible for SmartTodo comments.
   # It is meant to be reopened by the host application in order to define
@@ -10,7 +16,7 @@ module SmartTodo
   #
   # @example Adding a custom event
   #   module SmartTodo
-  #     module Events
+  #     class Events
   #       def trello_card_close(card)
   #         ...
   #       end
@@ -18,33 +24,87 @@ module SmartTodo
   #   end
   #
   #   TODO(on: trello_card_close(381), to: 'john@example.com')
-  module Events
-    extend self
+  #
+  class Events
+    def initialize(now: nil, spec_set: nil, current_ruby_version: nil)
+      @now = now
+      @spec_set = spec_set
+      @rubygems_client = nil
+      @github_client = nil
+      @current_ruby_version = current_ruby_version
+    end
 
     # Check if the +date+ is in the past
     #
-    # @param date [String] a correctly formatted date
+    # @param on_date [String] a string parsable by Time.parse
     # @return [false, String]
-    def date(date)
-      Date.met?(date)
+    def date(on_date)
+      if now >= Time.parse(on_date)
+        "We are past the *#{on_date}* due date and " \
+          "your TODO is now ready to be addressed."
+      else
+        false
+      end
     end
 
     # Check if a new version of +gem_name+ was released with the +requirements+ expected
+    #
+    # @example Expecting a specific version
+    #   gem_release('rails', '6.0')
+    #
+    # @example Expecting a version in the 5.x.x series
+    #   gem_release('rails', '> 5.2', '< 6')
     #
     # @param gem_name [String]
     # @param requirements [Array<String>] a list of version specifiers
     # @return [false, String]
     def gem_release(gem_name, *requirements)
-      GemRelease.new(gem_name, requirements).met?
+      response = rubygems_client.get("/api/v1/versions/#{gem_name}.json")
+
+      if response.code_type < Net::HTTPClientError
+        "The gem *#{gem_name}* doesn't seem to exist, I can't determine if " \
+          "your TODO is ready to be addressed."
+      else
+        requirement = Gem::Requirement.new(requirements)
+        version = JSON.parse(response.body).find { |gem| requirement.satisfied_by?(Gem::Version.new(gem["number"])) }
+
+        if version
+          "The gem *#{gem_name}* was released to version *#{version["number"]}* and " \
+            "your TODO is now ready to be addressed."
+        else
+          false
+        end
+      end
     end
 
     # Check if +gem_name+ was bumped to the +requirements+ expected
+    #
+    # @example Expecting a specific version
+    #   gem_bump('rails', '6.0')
+    #
+    # @example Expecting a version in the 5.x.x series
+    #   gem_bump('rails', '> 5.2', '< 6')
     #
     # @param gem_name [String]
     # @param requirements [Array<String>] a list of version specifiers
     # @return [false, String]
     def gem_bump(gem_name, *requirements)
-      GemBump.new(gem_name, requirements).met?
+      specs = spec_set[gem_name]
+
+      if specs.empty?
+        "The gem *#{gem_name}* is not in your dependencies, I can't determine if " \
+          "your TODO is ready to be addressed."
+      else
+        requirement = Gem::Requirement.new(requirements)
+        version = specs.first.version
+
+        if requirement.satisfied_by?(version)
+          "The gem *#{gem_name}* was updated to version *#{version}* and " \
+            "your TODO is now ready to be addressed."
+        else
+          false
+        end
+      end
     end
 
     # Check if the issue +issue_number+ is closed
@@ -54,7 +114,22 @@ module SmartTodo
     # @param issue_number [String, Integer]
     # @return [false, String]
     def issue_close(organization, repo, issue_number)
-      IssueClose.new(organization, repo, issue_number, type: "issues").met?
+      headers = github_headers(organization, repo)
+      response = github_client.get("/repos/#{organization}/#{repo}/issues/#{issue_number}", headers)
+
+      if response.code_type < Net::HTTPClientError
+        <<~EOM
+          I can't retrieve the information from the issue *#{issue_number}* in the *#{organization}/#{repo}* repository.
+
+          If the repository is a private one, make sure to export the `#{GITHUB_TOKEN}`
+          environment variable with a correct GitHub token.
+        EOM
+      elsif JSON.parse(response.body)["state"] == "closed"
+        "The issue https://github.com/#{organization}/#{repo}/issues/#{issue_number} is now closed, " \
+          "your TODO is ready to be addressed."
+      else
+        false
+      end
     end
 
     # Check if the pull request +pr_number+ is closed
@@ -64,7 +139,22 @@ module SmartTodo
     # @param pr_number [String, Integer]
     # @return [false, String]
     def pull_request_close(organization, repo, pr_number)
-      IssueClose.new(organization, repo, pr_number, type: "pulls").met?
+      headers = github_headers(organization, repo)
+      response = github_client.get("/repos/#{organization}/#{repo}/pulls/#{pr_number}", headers)
+
+      if response.code_type < Net::HTTPClientError
+        <<~EOM
+          I can't retrieve the information from the PR *#{pr_number}* in the *#{organization}/#{repo}* repository.
+
+          If the repository is a private one, make sure to export the `#{GITHUB_TOKEN}`
+          environment variable with a correct GitHub token.
+        EOM
+      elsif JSON.parse(response.body)["state"] == "closed"
+        "The pull request https://github.com/#{organization}/#{repo}/pull/#{pr_number} is now closed, " \
+          "your TODO is ready to be addressed."
+      else
+        false
+      end
     end
 
     # Check if the installed ruby version meets requirements.
@@ -72,7 +162,65 @@ module SmartTodo
     # @param requirements [Array<String>] a list of version specifiers
     # @return [false, String]
     def ruby_version(*requirements)
-      RubyVersion.new(requirements).met?
+      requirement = Gem::Requirement.new(requirements)
+
+      if requirement.satisfied_by?(current_ruby_version)
+        "The currently installed version of Ruby #{current_ruby_version} is #{requirement}."
+      else
+        false
+      end
+    end
+
+    private
+
+    def now
+      @now ||= Time.now
+    end
+
+    def spec_set
+      @spec_set ||= Bundler.load.specs
+    end
+
+    def rubygems_client
+      @rubygems_client ||= Net::HTTP.new("rubygems.org", Net::HTTP.https_default_port).tap do |client|
+        client.use_ssl = true
+      end
+    end
+
+    def github_client
+      @github_client ||= Net::HTTP.new("api.github.com", Net::HTTP.https_default_port).tap do |client|
+        client.use_ssl = true
+      end
+    end
+
+    def github_headers(organization, repo)
+      headers = { "Accept" => "application/vnd.github.v3+json" }
+
+      token = github_authorization_token(organization, repo)
+      headers["Authorization"] = "token #{token}" if token
+
+      headers
+    end
+
+    GITHUB_TOKEN = "SMART_TODO_GITHUB_TOKEN"
+
+    # @return [String, nil]
+    def github_authorization_token(organization, repo)
+      organization_name = organization.upcase.gsub(/[^A-Z0-9]/, "_")
+      repo_name = repo.upcase.gsub(/[^A-Z0-9]/, "_")
+
+      [
+        "#{GITHUB_TOKEN}__#{organization_name}__#{repo_name}",
+        "#{GITHUB_TOKEN}__#{organization_name}",
+        GITHUB_TOKEN,
+      ].find do |key|
+        token = ENV[key]
+        break token unless token.nil? || token.empty?
+      end
+    end
+
+    def current_ruby_version
+      @current_ruby_version ||= Gem::Version.new(RUBY_VERSION)
     end
   end
 end

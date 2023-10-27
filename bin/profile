@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "smart_todo"
+
+class NullDispatcher < SmartTodo::Dispatchers::Base
+  class << self
+    def validate_options!(_); end
+  end
+
+  def dispatch
+  end
+end
+
+exit SmartTodo::CLI.new(NullDispatcher).run

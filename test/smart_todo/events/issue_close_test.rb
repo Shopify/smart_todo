@@ -3,24 +3,23 @@
 require "test_helper"
 
 module SmartTodo
-  module Events
+  class Events
     class IssueCloseTest < Minitest::Test
       def test_when_pull_request_is_close
         stub_request(:get, /api.github.com/)
           .to_return(body: JSON.dump(state: "closed"))
 
-        expected = <<~EOM
-          The Pull Request or Issue https://github.com/rails/rails/pull/123
-          is now closed, your TODO is ready to be addressed.
-        EOM
-        assert_equal(expected, IssueClose.new("rails", "rails", "123", type: "pulls").met?)
+        expected =
+          "The pull request https://github.com/rails/rails/pull/123 is now closed, your TODO is ready to be addressed."
+
+        assert_equal(expected, pull_request_close("rails", "rails", "123"))
       end
 
       def test_when_pull_request_is_open
         stub_request(:get, /api.github.com/)
           .to_return(body: JSON.dump(state: "open"))
 
-        assert_equal(false, IssueClose.new("rails", "rails", "123", type: "pulls").met?)
+        assert_equal(false, pull_request_close("rails", "rails", "123"))
       end
 
       def test_when_gem_does_not_exist
@@ -28,21 +27,20 @@ module SmartTodo
           .to_return(status: 404)
 
         expected = <<~EOM
-          I can't retrieve the information from the PR or Issue *123* in the
-          *rails/rails* repository.
+          I can't retrieve the information from the PR *123* in the *rails/rails* repository.
 
-          If the repository is a private one, make sure to export the `SMART_TODO_GITHUB_TOKEN`
+          If the repository is a private one, make sure to export the `#{GITHUB_TOKEN}`
           environment variable with a correct GitHub token.
         EOM
 
-        assert_equal(expected, IssueClose.new("rails", "rails", "123", type: "pulls").met?)
+        assert_equal(expected, pull_request_close("rails", "rails", "123"))
       end
 
       def test_when_token_env_is_not_present
         stub_request(:get, /api.github.com/)
           .to_return(body: JSON.dump(state: "open"))
 
-        assert_equal(false, IssueClose.new("rails", "rails", "123", type: "pulls").met?)
+        assert_equal(false, pull_request_close("rails", "rails", "123"))
 
         assert_requested(:get, /api.github.com/) do |request|
           assert(!request.headers.key?("Authorization"))
@@ -50,11 +48,11 @@ module SmartTodo
       end
 
       def test_when_token_env_is_present
-        with_env(IssueClose::TOKEN_ENV => "abc") do
+        with_env(Events::GITHUB_TOKEN => "abc") do
           stub_request(:get, /api.github.com/)
             .to_return(body: JSON.dump(state: "open"))
 
-          assert_equal(false, IssueClose.new("rails", "rails", "123", type: "pulls").met?)
+          assert_equal(false, pull_request_close("rails", "rails", "123"))
 
           assert_requested(:get, /api.github.com/) do |request|
             assert_equal("token abc", request.headers["Authorization"])
@@ -64,13 +62,13 @@ module SmartTodo
 
       def test_when_org_token_env_is_present
         with_env(
-          IssueClose::TOKEN_ENV + "__RAILS" => "abcd",
-          IssueClose::TOKEN_ENV => "abc",
+          Events::GITHUB_TOKEN + "__RAILS" => "abcd",
+          Events::GITHUB_TOKEN => "abc",
         ) do
           stub_request(:get, /api.github.com/)
             .to_return(body: JSON.dump(state: "open"))
 
-          assert_equal(false, IssueClose.new("rails", "rails", "123", type: "pulls").met?)
+          assert_equal(false, pull_request_close("rails", "rails", "123"))
 
           assert_requested(:get, /api.github.com/) do |request|
             assert_equal("token abcd", request.headers["Authorization"])
@@ -80,14 +78,14 @@ module SmartTodo
 
       def test_when_repo_org_token_env_is_present
         with_env(
-          IssueClose::TOKEN_ENV + "__SHOPIFY__SMART_TODO" => "abcde",
-          IssueClose::TOKEN_ENV + "__SHOPIFY" => "abcd",
-          IssueClose::TOKEN_ENV => "abc",
+          Events::GITHUB_TOKEN + "__SHOPIFY__SMART_TODO" => "abcde",
+          Events::GITHUB_TOKEN + "__SHOPIFY" => "abcd",
+          Events::GITHUB_TOKEN => "abc",
         ) do
           stub_request(:get, /api.github.com/)
             .to_return(body: JSON.dump(state: "open"))
 
-          assert_equal(false, IssueClose.new("Shopify", "smart-todo", "123", type: "pulls").met?)
+          assert_equal(false, pull_request_close("Shopify", "smart-todo", "123"))
 
           assert_requested(:get, /api.github.com/) do |request|
             assert_equal("token abcde", request.headers["Authorization"])
@@ -100,7 +98,7 @@ module SmartTodo
         stub_request(:get, expected_endpoint)
           .to_return(body: JSON.dump(state: "open"))
 
-        assert_equal(false, IssueClose.new("rails", "rails", "123", type: "pulls").met?)
+        assert_equal(false, pull_request_close("rails", "rails", "123"))
         assert_requested(:get, expected_endpoint)
       end
 
@@ -109,11 +107,19 @@ module SmartTodo
         stub_request(:get, expected_endpoint)
           .to_return(body: JSON.dump(state: "open"))
 
-        assert_equal(false, IssueClose.new("rails", "rails", "123", type: "issues").met?)
+        assert_equal(false, issue_close("rails", "rails", "123"))
         assert_requested(:get, expected_endpoint)
       end
 
       private
+
+      def issue_close(organization, repo, issue_number)
+        Events.new.issue_close(organization, repo, issue_number)
+      end
+
+      def pull_request_close(organization, repo, pr_number)
+        Events.new.pull_request_close(organization, repo, pr_number)
+      end
 
       def with_env(env = {})
         original_env = ENV.to_h

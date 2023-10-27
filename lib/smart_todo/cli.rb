@@ -1,15 +1,17 @@
 # frozen_string_literal: true
 
 require "optionparser"
+require "etc"
 
 module SmartTodo
   # This class is the entrypoint of the SmartTodo library and is responsible
   # to retrieve the command line options as well as iterating over each files/directories
   # to run the +CommentParser+ on.
   class CLI
-    def initialize
+    def initialize(dispatcher = nil)
       @options = {}
       @errors = []
+      @dispatcher = dispatcher
     end
 
     # @param args [Array<String>]
@@ -19,14 +21,17 @@ module SmartTodo
 
       paths << "." if paths.empty?
 
+      comment_parser = CommentParser.new
       paths.each do |path|
-        normalize_path(path).each do |file|
-          parse_file(file)
+        normalize_path(path).each do |filepath|
+          comment_parser.parse_file(filepath)
 
           $stdout.print(".")
           $stdout.flush
         end
       end
+
+      process_dispatches(process_todos(comment_parser.todos))
 
       if @errors.empty?
         0
@@ -79,14 +84,17 @@ module SmartTodo
       end
     end
 
-    # @param file [String] a path to a file
-    def parse_file(file)
-      Parser::CommentParser.new(File.read(file, encoding: "UTF-8")).parse.each do |todo_node|
+    def process_todos(todos)
+      events = Events.new
+      dispatches = []
+
+      todos.each do |todo|
         event_message = nil
-        event_met = todo_node.metadata.events.find do |event|
-          event_message = Events.public_send(event.method_name, *event.arguments)
+        event_met = todo.events.find do |event|
+          event_message = events.public_send(event.method_name, *event.arguments)
         rescue => e
-          message = "Error while parsing #{file} on event `#{event.method_name}` with arguments #{event.arguments}: " \
+          message = "Error while parsing #{todo.filepath} on event `#{event.method_name}` " \
+            "with arguments #{event.arguments.map(&:inspect)}: " \
             "#{e.message}"
 
           @errors << message
@@ -94,10 +102,36 @@ module SmartTodo
           nil
         end
 
-        @errors.concat(todo_node.metadata.errors)
-
-        dispatcher.new(event_message, todo_node, file, @options).dispatch if event_met
+        @errors.concat(todo.errors)
+        dispatches << [event_message, todo] if event_met
       end
+
+      dispatches
+    end
+
+    def process_dispatches(dispatches)
+      queue = Queue.new
+      dispatches.each { |dispatch| queue << dispatch }
+
+      thread_count = Etc.nprocessors
+      thread_count.times { queue << nil }
+
+      threads =
+        thread_count.times.map do
+          Thread.new do
+            Thread.current.abort_on_exception = true
+
+            loop do
+              dispatch = queue.pop
+              break if dispatch.nil?
+
+              (event_message, todo) = dispatch
+              dispatcher.new(event_message, todo, todo.filepath, @options).dispatch
+            end
+          end
+        end
+
+      threads.each(&:join)
     end
   end
 end

@@ -159,7 +159,7 @@ module SmartTodo
           end
         EOM
 
-        Parser::CommentParser.new(ruby_code).parse[0]
+        CommentParser.parse(ruby_code)[0]
       end
     end
   end
