@@ -40,7 +40,7 @@ module SmartTodo
         @todo_node = todo_node
         @options = options
         @file = file
-        @assignees = @todo_node.metadata.assignees
+        @assignees = @todo_node.assignees
       end
 
       # This method gets called when a TODO reminder is expired and needs to be delivered.

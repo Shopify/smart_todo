@@ -69,30 +69,36 @@ module SmartTodo
     end
 
     def test_ascii_encoded_file_with_utf8_characters_can_be_parsed_correctly
+      previous_verbose = $VERBOSE
       previous_encoding = Encoding.default_external
-      Encoding.default_external = "US-ASCII"
 
-      cli = CLI.new
-      ruby_code = <<~EOM
-        # See "市区町村名"
-        def hello
+      begin
+        $VERBOSE = nil
+        Encoding.default_external = "US-ASCII"
+
+        cli = CLI.new
+        ruby_code = <<~EOM
+          # See "市区町村名"
+          def hello
+          end
+
+          # TODO(on: date('2070-03-02'), to: '#general')
+          #   See "市区町村名"
+          def hello
+          end
+        EOM
+
+        generate_ruby_file(ruby_code) do |file|
+          assert_output(".") do
+            assert_equal(0, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"']))
+          end
         end
 
-        # TODO(on: date('2070-03-02'), to: '#general')
-        #   See "市区町村名"
-        def hello
-        end
-      EOM
-
-      generate_ruby_file(ruby_code) do |file|
-        assert_output(".") do
-          assert_equal(0, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"']))
-        end
+        assert_not_requested(:post, /chat.postMessage/)
+      ensure
+        Encoding.default_external = previous_encoding
+        $VERBOSE = previous_verbose
       end
-
-      assert_not_requested(:post, /chat.postMessage/)
-    ensure
-      Encoding.default_external = previous_encoding
     end
 
     def test_does_not_crash_if_the_event_is_incorrectly_formatted
@@ -104,7 +110,7 @@ module SmartTodo
       EOM
 
       generate_ruby_file(ruby_code) do |file|
-        assert_output(".", /Incorrect `:on` event format: 2010-03-02/) do
+        assert_output(".", /Incorrect `:on` event format: "2010-03-02"/) do
           assert_equal(1, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"']))
         end
       end
@@ -121,7 +127,7 @@ module SmartTodo
       EOM
 
       generate_ruby_file(ruby_code) do |file|
-        assert_output(".", /Error while parsing .* on event `date` with arguments \["2010"\]: argument out of range/) do
+        assert_output(".", /Incorrect `:on` event format: date\(2010-03-02\)/) do
           assert_equal(1, cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"']))
         end
       end

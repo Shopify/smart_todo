@@ -60,7 +60,7 @@ module SmartTodo
 
       assert_slack_message_sent(
         "Hello :wave:,",
-        "The Pull Request or Issue https://github.com/shopify/shopify/pull/123\nis now closed",
+        "The pull request https://github.com/shopify/shopify/pull/123 is now closed",
       )
     end
 
@@ -81,7 +81,7 @@ module SmartTodo
 
       assert_slack_message_sent(
         "Hello :wave:,",
-        "The Pull Request or Issue https://github.com/shopify/shopify/pull/123\nis now closed",
+        "The issue https://github.com/shopify/shopify/issues/123 is now closed",
       )
     end
 

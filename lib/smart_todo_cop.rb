@@ -17,7 +17,7 @@ module RuboCop
         # @return [void]
         def investigate(processed_source)
           processed_source.comments.each do |comment|
-            next unless /^#\sTODO/ =~ comment.text
+            next unless /^#\sTODO/.match?(comment.text)
 
             metadata = metadata(comment.text)
 
@@ -36,21 +36,21 @@ module RuboCop
         # @param comment [String]
         # @return [SmartTodo::Parser::Visitor]
         def metadata(comment)
-          ::SmartTodo::Parser::MetadataParser.parse(comment.gsub(/^#/, ""))
+          ::SmartTodo::Todo.new(comment)
         end
 
         # @param metadata [SmartTodo::Parser::Visitor]
         # @return [true, false]
         def smart_todo?(metadata)
           metadata.events.any? &&
-            metadata.events.all? { |event| event.is_a?(::SmartTodo::Parser::MethodNode) } &&
+            metadata.events.all? { |event| event.is_a?(::SmartTodo::Todo::CallNode) } &&
             metadata.assignees.any?
         end
 
         # @param metadata [Array<SmartTodo::Parser::MethodNode>]
         # @return [Array<String>]
         def invalid_event_methods(events)
-          events.map(&:method_name).reject { |method| ::SmartTodo::Events.respond_to?(method) }
+          events.map(&:method_name).reject { |method| ::SmartTodo::Events.method_defined?(method) }
         end
       end
     end
