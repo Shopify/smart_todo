@@ -30,6 +30,7 @@ module SmartTodo
         client.use_ssl = true
         client.read_timeout = 30
         client.ssl_timeout = 15
+        client.max_retries = 2
       end
     end
 
