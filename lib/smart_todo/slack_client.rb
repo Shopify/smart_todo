@@ -26,12 +26,7 @@ module SmartTodo
     # @param slack_token [String]
     def initialize(slack_token)
       @slack_token = slack_token
-      @client = Net::HTTP.new("slack.com", Net::HTTP.https_default_port).tap do |client|
-        client.use_ssl = true
-        client.read_timeout = 30
-        client.ssl_timeout = 15
-        client.max_retries = 2
-      end
+      @client = HttpClientBuilder.build("slack.com")
     end
 
     # Retrieve the Slack ID of a user from his email

@@ -182,21 +182,11 @@ module SmartTodo
     end
 
     def rubygems_client
-      @rubygems_client ||= Net::HTTP.new("rubygems.org", Net::HTTP.https_default_port).tap do |client|
-        client.use_ssl = true
-        client.read_timeout = 30
-        client.ssl_timeout = 15
-        client.max_retries = 2
-      end
+      @rubygems_client ||= HttpClientBuilder.build("rubygems.org")
     end
 
     def github_client
-      @github_client ||= Net::HTTP.new("api.github.com", Net::HTTP.https_default_port).tap do |client|
-        client.use_ssl = true
-        client.read_timeout = 30
-        client.ssl_timeout = 15
-        client.max_retries = 2
-      end
+      @github_client ||= HttpClientBuilder.build("api.github.com")
     end
 
     def github_headers(organization, repo)
