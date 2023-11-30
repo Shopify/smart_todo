@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     smart_todo (1.7.0)
-      prism
+      prism (~> 0.15)
 
 GEM
   remote: https://rubygems.org/
