@@ -68,7 +68,7 @@ module SmartTodo
         <<~EOM
           #{header}
 
-          You have an assigned TODO in the `#{@file}` file.
+          You have an assigned TODO in the `#{filepath_or_url}` file.
           #{@event_message}
 
           Here is the associated comment on your TODO:
@@ -90,6 +90,14 @@ module SmartTodo
       # Hello message for user actually existing in the organization
       def existing_user
         "Hello :wave:,"
+      end
+
+      def filepath_or_url
+        if  @options.has_key? :repository_config
+          return @options[:repository_config].github_repo_url + @file
+        end
+
+        @file
       end
     end
   end
