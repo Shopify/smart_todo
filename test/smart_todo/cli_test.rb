@@ -150,5 +150,32 @@ module SmartTodo
         end
       end
     end
+
+    def test_if_repository_config_read_correctly
+      cli = CLI.new
+      ruby_code = <<~EOM
+        # TODO(on: date('2015-03-01'), to: 'john@example.com')
+        #   Revisit the way we say hello.
+        #   Please.
+        def hello
+        end
+      EOM
+
+      mock = Minitest::Mock.new
+      mock.expect(:dispatch, nil)
+
+      generate_ruby_file(ruby_code) do |file|
+        Dispatchers::Slack.stub(:new, mock) do
+          assert_output(".") do
+            assert_equal(
+              0,
+              cli.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"', "--dispatcher", "slack", "--read-repository-config"]),
+            )
+          end
+        end
+      end
+
+      assert_mock(mock)
+    end
   end
 end
