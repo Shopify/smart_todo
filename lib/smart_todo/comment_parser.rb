@@ -8,12 +8,22 @@ module SmartTodo
       @todos = []
     end
 
-    def parse(source, filepath = "-e")
-      parse_comments(Prism.parse_comments(source), filepath)
-    end
+    if Prism.respond_to?(:parse_comments)
+      def parse(source, filepath = "-e")
+        parse_comments(Prism.parse_comments(source), filepath)
+      end
 
-    def parse_file(filepath)
-      parse_comments(Prism.parse_file_comments(filepath), filepath)
+      def parse_file(filepath)
+        parse_comments(Prism.parse_file_comments(filepath), filepath)
+      end
+    else
+      def parse(source, filepath = "-e")
+        parse_comments(Prism.parse(source, filepath).comments, filepath)
+      end
+
+      def parse_file(filepath)
+        parse_comments(Prism.parse_file(filepath).comments, filepath)
+      end
     end
 
     class << self
@@ -26,11 +36,21 @@ module SmartTodo
 
     private
 
+    if defined?(Prism::InlineComment)
+      def inline?(comment)
+        comment.is_a?(Prism::InlineComment)
+      end
+    else
+      def inline?(comment)
+        comment.type == :inline
+      end
+    end
+
     def parse_comments(comments, filepath)
       current_todo = nil
 
       comments.each do |comment|
-        next unless comment.is_a?(Prism::InlineComment)
+        next unless inline?(comment)
 
         source = comment.location.slice
 
