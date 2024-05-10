@@ -32,6 +32,8 @@ module SmartTodo
     end
 
     class Compiler < Prism::Compiler
+      Result = type_member
+
       attr_reader :metadata
 
       def initialize(metadata)
