@@ -71,5 +71,29 @@ module SmartTodo
 
       @client.lookup_user_by_email("john@example.com")
     end
+
+    def test_handles_sleeping
+      counter = 0
+
+      stub_request(:get, /slack.com/).to_return do
+        counter += 1
+        if counter == 1
+          { status: 429, headers: { "Retry-After" => "1" } }
+        else
+          { status: 201, body: JSON.dump(ok: true) }
+        end
+      end
+
+      @client.lookup_user_by_email("john@example.com")
+    end
+
+    def test_fails_sleeping
+      stub_request(:get, /slack.com/)
+        .to_return(status: 429, headers: { "Retry-After" => "0" })
+
+      assert_raises(Net::HTTPError) do
+        @client.lookup_user_by_email("john@example.com")
+      end
+    end
   end
 end

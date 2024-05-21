@@ -39,9 +39,9 @@ module SmartTodo
     #
     # @see https://api.slack.com/methods/users.lookupByEmail
     def lookup_user_by_email(email)
-      headers = { "Content-Type" => "application/x-www-form-urlencoded" }
-
-      request(:get, "/api/users.lookupByEmail?email=#{CGI.escape(email)}", nil, headers)
+      headers = default_headers.merge("Content-Type" => "application/x-www-form-urlencoded")
+      request = Net::HTTP::Get.new("/api/users.lookupByEmail?email=#{CGI.escape(email)}", headers)
+      dispatch(request)
     end
 
     # Send a message to a Slack channel or to a user
@@ -55,7 +55,10 @@ module SmartTodo
     #
     # @see https://api.slack.com/methods/chat.postMessage
     def post_message(channel, text)
-      request(:post, "/api/chat.postMessage", JSON.dump(channel: channel, text: text))
+      headers = default_headers
+      request = Net::HTTP::Post.new("/api/chat.postMessage", headers)
+      request.body = JSON.dump(channel: channel, text: text)
+      dispatch(request)
     end
 
     private
@@ -67,27 +70,19 @@ module SmartTodo
     #
     # @raise [Net::HTTPError] in case the request to Slack failed
     # @raise [SlackClient::Error] in case Slack returns a { ok: false } in the body
-    def request(method, endpoint, data = nil, headers = {})
-      response = case method
-      when :post, :patch
-        @client.public_send(method, endpoint, data, default_headers.merge(headers))
-      else
-        @client.public_send(method, endpoint, default_headers.merge(headers))
+    def dispatch(request, max_attempts = 5)
+      response = @client.request(request)
+      attempts = 1
+
+      while response.is_a?(Net::HTTPTooManyRequests) && attempts < max_attempts
+        sleep([Integer(response["Retry-After"]), 600].min)
+        response = @client.request(request)
+        attempts += 1
       end
 
-      slack_response!(response)
-    end
-
-    # Check if the response to Slack was a 200 and the Slack API request was successful
-    #
-    # @param response [Net::HTTPResponse] a net Net::HTTPResponse subclass
-    #   (Net::HTTPOK, Net::HTTPNotFound ...)
-    # @return [Hash]
-    #
-    # @raise [Net::HTTPError] in case the request to Slack failed
-    # @raise [SlackClient::Error] in case Slack returns a { ok: false } in the body
-    def slack_response!(response)
-      raise(Net::HTTPError.new("Request to slack failed", response)) unless response.code_type < Net::HTTPSuccess
+      unless response.code_type < Net::HTTPSuccess
+        raise(Net::HTTPError.new("Request to slack failed", response))
+      end
 
       body = JSON.parse(response.body)
 
