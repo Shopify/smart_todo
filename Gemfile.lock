@@ -26,7 +26,8 @@ GEM
     rainbow (3.1.1)
     rake (13.0.6)
     regexp_parser (2.9.0)
-    rexml (3.2.6)
+    rexml (3.3.6)
+      strscan
     rubocop (1.62.1)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
@@ -43,6 +44,7 @@ GEM
     rubocop-shopify (2.14.0)
       rubocop (~> 1.51)
     ruby-progressbar (1.13.0)
+    strscan (3.1.0)
     unicode-display_width (2.5.0)
     webmock (3.11.2)
       addressable (>= 2.3.6)
