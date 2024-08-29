@@ -120,12 +120,33 @@ module SmartTodo
         Slack.validate_options!(slack_token: "123", fallback_channel: "#general")
       end
 
+      def test_validate_options_when_token_option_passed_is_empty_string
+        error = assert_raises(ArgumentError) do
+          Slack.validate_options!(slack_token: "", fallback_channel: "#general")
+        end
+
+        assert_equal("Missing :slack_token", error.message)
+      ensure
+        ENV.delete("SMART_TODO_SLACK_TOKEN")
+      end
+
       def test_validate_options_when_token_option_is_missing
         error = assert_raises(ArgumentError) do
           Slack.validate_options!(fallback_channel: "#general")
         end
 
         assert_equal("Missing :slack_token", error.message)
+      end
+
+      def test_validate_options_when_token_option_env_is_empty_string
+        ENV["SMART_TODO_SLACK_TOKEN"] = ""
+        error = assert_raises(ArgumentError) do
+          Slack.validate_options!(fallback_channel: "#general")
+        end
+
+        assert_equal("Missing :slack_token", error.message)
+      ensure
+        ENV.delete("SMART_TODO_SLACK_TOKEN")
       end
 
       def test_when_slack_token_option_is_in_the_environment
