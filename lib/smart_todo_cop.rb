@@ -9,7 +9,7 @@ module RuboCop
       # This Cop does not run by default. It should be added to the RuboCop host's configuration file.
       #
       # @see https://rubocop.readthedocs.io/en/latest/extensions/#loading-extensions
-      class SmartTodoCop < Cop
+      class SmartTodoCop < Base
         HELP = "For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax"
         MSG = "Don't write regular TODO comments. Write SmartTodo compatible syntax comments. #{HELP}"
 
