@@ -15,7 +15,7 @@ module RuboCop
 
         # @param processed_source [RuboCop::ProcessedSource]
         # @return [void]
-        def investigate(processed_source)
+        def on_new_investigation
           processed_source.comments.each do |comment|
             next unless /^#\sTODO/.match?(comment.text)
 

@@ -84,19 +84,19 @@ module SmartTodo
 
     def expect_offense(source)
       annotated_source = RuboCop::RSpec::ExpectOffense::AnnotatedSource.parse(source)
-      investigate(annotated_source.plain_source)
+      report = investigate(annotated_source.plain_source)
 
-      actual_annotations = annotated_source.with_offense_annotations(cop.offenses)
-      assert_equal(actual_annotations.to_s, annotated_source.to_s)
+      actual_annotations = annotated_source.with_offense_annotations(report.offenses)
+      assert_equal(annotated_source.to_s, actual_annotations.to_s)
     end
     alias_method :expect_no_offense, :expect_offense
 
     def investigate(source, ruby_version = 2.5, file = "(file)")
       processed_source = RuboCop::ProcessedSource.new(source, ruby_version, file)
 
-      RuboCop::Cop::Commissioner.new([cop], [], raise_error: true).tap do |commissioner|
-        commissioner.investigate(processed_source)
-      end
+      assert(processed_source.valid_syntax?)
+      comm = RuboCop::Cop::Commissioner.new([cop], [], raise_error: true)
+      comm.investigate(processed_source)
     end
 
     def cop
