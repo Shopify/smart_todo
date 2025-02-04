@@ -10,7 +10,9 @@ GEM
     addressable (2.8.0)
       public_suffix (>= 2.0.2, < 5.0)
     ast (2.4.2)
-    crack (0.4.5)
+    bigdecimal (3.1.9)
+    crack (1.0.0)
+      bigdecimal
       rexml
     hashdiff (1.0.1)
     json (2.7.1)
