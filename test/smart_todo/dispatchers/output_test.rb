@@ -6,7 +6,7 @@ module SmartTodo
   module Dispatchers
     class OutputTest < Minitest::Test
       def setup
-        @options = { fallback_channel: "#general", slack_token: "123" }
+        @options = { fallback_channel: "#general", slack_token: "123", repo: "example" }
       end
 
       def test_dispatch
@@ -14,7 +14,7 @@ module SmartTodo
         expected_text = <<~HEREDOC
           Hello :wave:,
 
-          You have an assigned TODO in the `file.rb` file.
+          You have an assigned TODO in the `file.rb` file in repository `example`.
           Foo
 
           Here is the associated comment on your TODO:

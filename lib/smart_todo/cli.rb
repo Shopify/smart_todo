@@ -66,6 +66,9 @@ module SmartTodo
         opts.on("--dispatcher DISPATCHER") do |dispatcher|
           @options[:dispatcher] = dispatcher
         end
+        opts.on("--repo [REPO]", "Repository name to include in notifications") do |repo|
+          @options[:repo] = repo || File.basename(Dir.pwd)
+        end
       end
     end
 

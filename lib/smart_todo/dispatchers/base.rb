@@ -68,7 +68,7 @@ module SmartTodo
         <<~EOM
           #{header}
 
-          You have an assigned TODO in the `#{@file}` file.
+          You have an assigned TODO in the `#{@file}` file#{repo}.
           #{@event_message}
 
           Here is the associated comment on your TODO:
@@ -90,6 +90,15 @@ module SmartTodo
       # Hello message for user actually existing in the organization
       def existing_user
         "Hello :wave:,"
+      end
+
+      def repo
+        repo = @options[:repo]
+        return unless repo
+
+        unless repo.empty?
+          " in repository `#{repo}`"
+        end
       end
     end
   end
