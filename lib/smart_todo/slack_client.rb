@@ -75,13 +75,14 @@ module SmartTodo
       attempts = 1
 
       while response.is_a?(Net::HTTPTooManyRequests) && attempts < max_attempts
+        puts "Rate limited, sleeping for #{response["Retry-After"]} seconds"
         sleep([Integer(response["Retry-After"]), 600].min)
         response = @client.request(request)
         attempts += 1
       end
 
       unless response.code_type < Net::HTTPSuccess
-        raise(Net::HTTPError.new("Request to slack failed", response))
+        raise(Net::HTTPError.new("Request to slack failed #{response.body}, code #{response.code}, attempt #{attempts}", response))
       end
 
       body = JSON.parse(response.body)
