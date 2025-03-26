@@ -85,7 +85,7 @@ module SmartTodo
       end
 
       capture_io do
-        @client.lookup_user_by_email("john@example.com")
+        @client.lookup_user_by_email("john@example.com", 1)
       end
     end
 
@@ -95,7 +95,7 @@ module SmartTodo
 
       assert_raises(Net::HTTPError) do
         capture_io do
-          @client.lookup_user_by_email("john@example.com")
+          @client.lookup_user_by_email("john@example.com", 0)
         end
       end
     end
