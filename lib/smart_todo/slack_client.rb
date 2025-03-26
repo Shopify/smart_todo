@@ -82,7 +82,8 @@ module SmartTodo
       end
 
       unless response.code_type < Net::HTTPSuccess
-        raise(Net::HTTPError.new("Request to slack failed #{response.body}, code #{response.code}, attempt #{attempts}", response))
+        message = "Request to slack failed #{response.body}, code #{response.code}, attempt #{attempts}"
+        raise(Net::HTTPError.new(message, response))
       end
 
       body = JSON.parse(response.body)

@@ -35,15 +35,17 @@ module SmartTodo
       def dispatch_one(assignee)
         user = slack_user_or_channel(assignee)
 
-        client.post_message(user.dig("user", "id"), slack_message(user, assignee))
-      rescue SlackClient::Error => error
-        if ["users_not_found", "channel_not_found", "is_archived"].include?(error.error_code)
-          user = { "user" => { "id" => @options[:fallback_channel] }, "fallback" => true }
-        else
-          raise(error)
-        end
+        return unless user
 
-        client.post_message(user.dig("user", "id"), slack_message(user, assignee))
+        begin
+          client.post_message(user.dig("user", "id"), slack_message(user, assignee))
+        rescue SlackClient::Error => error
+          user = handle_slack_error(error, "Error dispatching message")
+          retry
+        rescue Net::HTTPError => error
+          $stderr.puts "Error dispatching message: #{error.message}"
+          $stderr.puts "Response: #{error.response.body}"
+        end
       end
 
       private
@@ -58,11 +60,24 @@ module SmartTodo
         else
           { "user" => { "id" => assignee } }
         end
+      rescue SlackClient::Error => error
+        handle_slack_error(error, "Error finding user or channel")
+      rescue Net::HTTPError => error
+        $stderr.puts "Error finding user or channel: #{error.message}"
+        $stderr.puts "Response: #{error.response.body}"
       end
 
       # @return [SlackClient] an instance of SlackClient
       def client
         @client ||= SlackClient.new(@options[:slack_token])
+      end
+
+      def handle_slack_error(error, message)
+        if ["users_not_found", "channel_not_found", "is_archived"].include?(error.error_code)
+          { "user" => { "id" => @options[:fallback_channel] }, "fallback" => true }
+        else
+          $stderr.puts "#{message}: #{error.message}"
+        end
       end
     end
   end
