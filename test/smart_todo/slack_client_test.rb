@@ -84,7 +84,9 @@ module SmartTodo
         end
       end
 
-      @client.lookup_user_by_email("john@example.com")
+      capture_io do
+        @client.lookup_user_by_email("john@example.com", 1)
+      end
     end
 
     def test_fails_sleeping
@@ -92,7 +94,9 @@ module SmartTodo
         .to_return(status: 429, headers: { "Retry-After" => "0" })
 
       assert_raises(Net::HTTPError) do
-        @client.lookup_user_by_email("john@example.com")
+        capture_io do
+          @client.lookup_user_by_email("john@example.com", 0)
+        end
       end
     end
   end

@@ -83,9 +83,14 @@ module SmartTodo
 
         dispatcher = Slack.new("Foo", todo_node, "file.rb", @options)
 
-        assert_raises(SlackClient::Error) do
+        _, stderr = capture_io do
           dispatcher.dispatch
         end
+
+        assert_match(
+          /Error finding user or channel: Response body: .*"fatal_error".*/,
+          stderr,
+        )
       end
 
       def test_when_user_is_a_slack_channel
