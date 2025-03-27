@@ -52,6 +52,32 @@ module SmartTodo
       RUBY
     end
 
+    def test_add_offense_when_todo_assignee_is_not_a_string
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: #foo)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid event assignee. This method only accepts strings. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_assignee_is_an_array
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: ['#foo', '#bar'])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid event assignee. This method only accepts strings. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_does_not_add_offense_when_todo_assignee_is_a_list_of_strings
+      expect_no_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: '#foo', to: '#bar')
+        def hello
+        end
+      RUBY
+    end
+
     def test_does_not_add_offense_when_todo_is_a_smart_todo
       expect_no_offense(<<~RUBY)
         # TODO(on: date('2019-08-04'), to: 'john@example.com')

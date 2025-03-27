@@ -27,6 +27,8 @@ module RuboCop
               add_offense(comment)
             elsif (methods = invalid_event_methods(metadata.events)).any?
               add_offense(comment, message: "Invalid event method(s): #{methods.join(", ")}. #{HELP}")
+            elsif invalid_assignees(metadata.assignees).any?
+              add_offense(comment, message: "Invalid event assignee. This method only accepts strings. #{HELP}")
             end
           end
         end
@@ -51,6 +53,12 @@ module RuboCop
         # @return [Array<String>]
         def invalid_event_methods(events)
           events.map(&:method_name).reject { |method| ::SmartTodo::Events.method_defined?(method) }
+        end
+
+        # @param assignees [Array]
+        # @return [Array]
+        def invalid_assignees(assignees)
+          assignees.reject { |assignee| assignee.is_a?(String) }
         end
       end
     end
