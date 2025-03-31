@@ -75,7 +75,7 @@ module SmartTodo
       attempts = 1
 
       while response.is_a?(Net::HTTPTooManyRequests) && attempts < max_attempts
-        sleep_time = Integer(response["Retry-After"]).clamp(min_sleep, 600)
+        sleep_time = Integer(response["Retry-After"]).clamp(min_sleep, 120)
         puts "Rate limited, sleeping for #{sleep_time} seconds"
         sleep(sleep_time)
         response = @client.request(request)
