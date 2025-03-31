@@ -32,16 +32,17 @@ module SmartTodo
     # Retrieve the Slack ID of a user from his email
     #
     # @param email [String]
+    # @param min_sleep [Integer] - the minimum sleep time in seconds in case of rate limiting
     # @return [Hash]
     #
     # @raise [Net::HTTPError] in case the request to Slack failed
     # @raise [SlackClient::Error] in case Slack returns a { ok: false } in the body
     #
     # @see https://api.slack.com/methods/users.lookupByEmail
-    def lookup_user_by_email(email)
+    def lookup_user_by_email(email, min_sleep = 30)
       headers = default_headers.merge("Content-Type" => "application/x-www-form-urlencoded")
       request = Net::HTTP::Get.new("/api/users.lookupByEmail?email=#{CGI.escape(email)}", headers)
-      dispatch(request)
+      dispatch(request, 5, min_sleep)
     end
 
     # Send a message to a Slack channel or to a user
@@ -63,25 +64,27 @@ module SmartTodo
 
     private
 
-    # @param method [Symbol]
-    # @param endpoint [String]
-    # @param data [String] JSON encoded data when making a POST request
-    # @param headers [Hash]
+    # @param request [Net::HTTPRequest]
+    # @param max_attempts [Integer] - the maximum number of attempts to make
+    # @param min_sleep [Integer] - the minimum sleep time in seconds in case of rate limiting
     #
     # @raise [Net::HTTPError] in case the request to Slack failed
     # @raise [SlackClient::Error] in case Slack returns a { ok: false } in the body
-    def dispatch(request, max_attempts = 5)
+    def dispatch(request, max_attempts = 5, min_sleep = 30)
       response = @client.request(request)
       attempts = 1
 
       while response.is_a?(Net::HTTPTooManyRequests) && attempts < max_attempts
-        sleep([Integer(response["Retry-After"]), 600].min)
+        sleep_time = Integer(response["Retry-After"]).clamp(min_sleep, 120)
+        puts "Rate limited, sleeping for #{sleep_time} seconds"
+        sleep(sleep_time)
         response = @client.request(request)
         attempts += 1
       end
 
       unless response.code_type < Net::HTTPSuccess
-        raise(Net::HTTPError.new("Request to slack failed", response))
+        message = "Request to slack failed #{response.body}, code #{response.code}, attempt #{attempts}"
+        raise(Net::HTTPError.new(message, response))
       end
 
       body = JSON.parse(response.body)
