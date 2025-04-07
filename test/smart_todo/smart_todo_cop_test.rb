@@ -218,6 +218,49 @@ module SmartTodo
       RUBY
     end
 
+    def test_add_offense_when_todo_has_missing_gem_release_arguments
+      expect_offense(<<~RUBY)
+        # TODO(on: gem_release(), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid gem_release event: Expected at least 1 argument (gem_name), got 0. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_non_string_gem_release_name
+      expect_offense(<<~RUBY)
+        # TODO(on: gem_release(123), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid gem_release event: First argument (gem_name) must be a string. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_non_string_gem_release_requirements
+      expect_offense(<<~RUBY)
+        # TODO(on: gem_release('rails', 123), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid gem_release event: Version requirements must be strings. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_does_not_add_offense_when_todo_has_valid_gem_release
+      expect_no_offense(<<~RUBY)
+        # TODO(on: gem_release('rails'), to: 'john@example.com')
+        def hello
+        end
+
+        # TODO(on: gem_release('rails', '>= 6.0'), to: 'john@example.com')
+        def hello
+        end
+
+        # TODO(on: gem_release('rails', '>= 6.0', '< 7.0'), to: 'john@example.com')
+        def hello
+        end
+      RUBY
+    end
+
     private
 
     def expected_message

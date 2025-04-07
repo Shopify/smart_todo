@@ -36,6 +36,8 @@ module RuboCop
               add_offense(comment, message: "#{invalid_issue_close.join(", ")}. #{HELP}")
             elsif (invalid_pull_request_close = invalid_pull_request_close_events(metadata.events)).any?
               add_offense(comment, message: "#{invalid_pull_request_close.join(", ")}. #{HELP}")
+            elsif (invalid_gem_release = invalid_gem_release_events(metadata.events)).any?
+              add_offense(comment, message: "#{invalid_gem_release.join(", ")}. #{HELP}")
             end
           end
         end
@@ -99,6 +101,26 @@ module RuboCop
           events.select { |event| event.method_name == :pull_request_close }
             .map { |event| validate_pull_request_close_args(event.arguments) }
             .compact
+        end
+
+        # @param events [Array<SmartTodo::Todo::CallNode>]
+        # @return [Array<String>]
+        def invalid_gem_release_events(events)
+          events.select { |event| event.method_name == :gem_release }
+            .map { |event| validate_gem_release_args(event.arguments) }
+            .compact
+        end
+
+        # @param args [Array]
+        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
+        def validate_gem_release_args(args)
+          if args.empty?
+            "Invalid gem_release event: Expected at least 1 argument (gem_name), got 0"
+          elsif !args[0].is_a?(String)
+            "Invalid gem_release event: First argument (gem_name) must be a string"
+          elsif args.size > 1 && !args[1..].all? { |arg| arg.is_a?(String) }
+            "Invalid gem_release event: Version requirements must be strings"
+          end
         end
 
         # @param args [Array]
