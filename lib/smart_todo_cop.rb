@@ -14,14 +14,6 @@ module RuboCop
         HELP = "For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax"
         MSG = "Don't write regular TODO comments. Write SmartTodo compatible syntax comments. #{HELP}"
 
-        EVENTS = [
-          :issue_close,
-          :pull_request_close,
-          :gem_release,
-          :gem_bump,
-          :ruby_version,
-        ].freeze
-
         # @param processed_source [RuboCop::ProcessedSource]
         # @return [void]
         def on_new_investigation
@@ -34,14 +26,10 @@ module RuboCop
               add_offense(comment, message: "Invalid TODO format: #{metadata.errors.join(", ")}. #{HELP}")
             elsif !smart_todo?(metadata)
               add_offense(comment)
-            elsif (methods = invalid_event_methods(metadata.events)).any?
-              add_offense(comment, message: "Invalid event method(s): #{methods.join(", ")}. #{HELP}")
             elsif invalid_assignees(metadata.assignees).any?
               add_offense(comment, message: "Invalid event assignee. This method only accepts strings. #{HELP}")
-            elsif (invalid_dates = invalid_dates(metadata.events)).any?
-              add_offense(comment, message: "Invalid date format: #{invalid_dates.join(", ")}. #{HELP}")
-            elsif (invalid_event = validate_events(metadata.events)).any?
-              add_offense(comment, message: "#{invalid_event.join(", ")}. #{HELP}")
+            elsif (invalid_events = validate_events(metadata.events)).any?
+              add_offense(comment, message: "#{invalid_events.join(". ")}. #{HELP}")
             end
           end
         end
@@ -62,12 +50,6 @@ module RuboCop
             metadata.assignees.any?
         end
 
-        # @param metadata [Array<SmartTodo::Parser::MethodNode>]
-        # @return [Array<String>]
-        def invalid_event_methods(events)
-          events.map(&:method_name).reject { |method| ::SmartTodo::Events.method_defined?(method) }
-        end
-
         # @param assignees [Array]
         # @return [Array]
         def invalid_assignees(assignees)
@@ -76,33 +58,29 @@ module RuboCop
 
         # @param events [Array<SmartTodo::Todo::CallNode>]
         # @return [Array<String>]
-        def invalid_dates(events)
-          events.select { |event| event.method_name == :date }
-            .map { |event| validate_date(event.arguments.first) }
-            .compact
-        end
-
-        # @param date_str [String]
-        # @return [String, nil] Returns error message if date is invalid, nil if valid
-        def validate_date(date_str)
-          Date.parse(date_str)
-          nil
-        rescue ArgumentError, TypeError
-          date_str
-        end
-
-        # @param events [Array<SmartTodo::Todo::CallNode>]
-        # @return [Array<String>]
         def validate_events(events)
-          EVENTS.flat_map do |event_type|
-            events.select { |event| event.method_name == event_type }
-              .map { |event| send(validate_method(event_type), event.arguments) }
-              .compact
-          end
+          invalid_methods = events.map(&:method_name).reject { |method| ::SmartTodo::Events.method_defined?(method) }
+          return ["Invalid event method(s): #{invalid_methods.join(", ")}"] if invalid_methods.any?
+
+          events.map do |event|
+            send(validate_method(event.method_name), event.arguments)
+          end.compact
         end
 
+        # @param event_type [Symbol]
+        # @return [String]
         def validate_method(event_type)
           "validate_#{event_type}_args"
+        end
+
+        # @param args [Array]
+        # @return [String, nil] Returns error message if date is invalid, nil if valid
+        def validate_date_args(args)
+          date = args.first
+          Date.parse(date)
+          nil
+        rescue ArgumentError, TypeError
+          "Invalid date format: #{date}"
         end
 
         # @param args [Array]
