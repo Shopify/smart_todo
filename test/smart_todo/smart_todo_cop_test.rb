@@ -164,6 +164,33 @@ module SmartTodo
       RUBY
     end
 
+    def test_add_offense_when_todo_has_missing_issue_close_arguments
+      expect_offense(<<~RUBY)
+        # TODO(on: issue_close('shopify'), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid issue_close event: Expected 3 arguments (organization, repo, issue_number), got 1. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_too_many_issue_close_arguments
+      expect_offense(<<~RUBY)
+        # TODO(on: issue_close('shopify', 'repo', '123', 'extra'), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid issue_close event: Expected 3 arguments (organization, repo, issue_number), got 4. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_non_string_issue_close_arguments
+      expect_offense(<<~RUBY)
+        # TODO(on: issue_close(123, 456, 789), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid issue_close event: Arguments must be strings. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
     private
 
     def expected_message

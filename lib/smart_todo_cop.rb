@@ -32,6 +32,8 @@ module RuboCop
               add_offense(comment, message: "Invalid event assignee. This method only accepts strings. #{HELP}")
             elsif (invalid_dates = invalid_dates(metadata.events)).any?
               add_offense(comment, message: "Invalid date format: #{invalid_dates.join(", ")}. #{HELP}")
+            elsif (invalid_issue_close = invalid_issue_close_events(metadata.events)).any?
+              add_offense(comment, message: "#{invalid_issue_close.join(", ")}. #{HELP}")
             end
           end
         end
@@ -79,6 +81,24 @@ module RuboCop
           nil
         rescue ArgumentError, TypeError
           date_str
+        end
+
+        # @param events [Array<SmartTodo::Todo::CallNode>]
+        # @return [Array<String>]
+        def invalid_issue_close_events(events)
+          events.select { |event| event.method_name == :issue_close }
+            .map { |event| validate_issue_close_args(event.arguments) }
+            .compact
+        end
+
+        # @param args [Array]
+        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
+        def validate_issue_close_args(args)
+          if args.size != 3
+            "Invalid issue_close event: Expected 3 arguments (organization, repo, issue_number), got #{args.size}"
+          elsif !args.all? { |arg| arg.is_a?(String) }
+            "Invalid issue_close event: Arguments must be strings"
+          end
         end
       end
     end
