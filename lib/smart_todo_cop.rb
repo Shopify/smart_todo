@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "smart_todo"
+require "date"
 
 module RuboCop
   module Cop
@@ -29,6 +30,8 @@ module RuboCop
               add_offense(comment, message: "Invalid event method(s): #{methods.join(", ")}. #{HELP}")
             elsif invalid_assignees(metadata.assignees).any?
               add_offense(comment, message: "Invalid event assignee. This method only accepts strings. #{HELP}")
+            elsif (invalid_dates = invalid_dates(metadata.events)).any?
+              add_offense(comment, message: "Invalid date format: #{invalid_dates.join(", ")}. #{HELP}")
             end
           end
         end
@@ -59,6 +62,23 @@ module RuboCop
         # @return [Array]
         def invalid_assignees(assignees)
           assignees.reject { |assignee| assignee.is_a?(String) }
+        end
+
+        # @param events [Array<SmartTodo::Todo::CallNode>]
+        # @return [Array<String>]
+        def invalid_dates(events)
+          events.select { |event| event.method_name == :date }
+            .map { |event| validate_date(event.arguments.first) }
+            .compact
+        end
+
+        # @param date_str [String]
+        # @return [String, nil] Returns error message if date is invalid, nil if valid
+        def validate_date(date_str)
+          Date.parse(date_str)
+          nil
+        rescue ArgumentError, TypeError
+          date_str
         end
       end
     end

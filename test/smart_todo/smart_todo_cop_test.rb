@@ -70,6 +70,69 @@ module SmartTodo
       RUBY
     end
 
+    def test_add_offense_when_todo_has_invalid_date_format
+      expect_offense(<<~RUBY)
+        # TODO(on: date('invalid-date'), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid date format: invalid-date. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_invalid_month
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2024-13-01'), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid date format: 2024-13-01. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_invalid_day
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2024-04-31'), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid date format: 2024-04-31. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_invalid_day_in_february
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2024-02-30'), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid date format: 2024-02-30. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_invalid_day_in_non_leap_year
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2023-02-29'), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid date format: 2023-02-29. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_date_is_not_a_string
+      expect_offense(<<~RUBY)
+        # TODO(on: date(2023-10-01), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid TODO format: Incorrect `:on` event format: date(2023-10-01). For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_date_is_nil
+      expect_offense(<<~RUBY)
+        # TODO(on: date(nil), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid TODO format: Incorrect `:on` event format: date(nil). For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
     def test_does_not_add_offense_when_todo_assignee_is_a_list_of_strings
       expect_no_offense(<<~RUBY)
         # TODO(on: date('2019-08-04'), to: '#foo', to: '#bar')
