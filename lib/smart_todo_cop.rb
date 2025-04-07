@@ -34,6 +34,8 @@ module RuboCop
               add_offense(comment, message: "Invalid date format: #{invalid_dates.join(", ")}. #{HELP}")
             elsif (invalid_issue_close = invalid_issue_close_events(metadata.events)).any?
               add_offense(comment, message: "#{invalid_issue_close.join(", ")}. #{HELP}")
+            elsif (invalid_pull_request_close = invalid_pull_request_close_events(metadata.events)).any?
+              add_offense(comment, message: "#{invalid_pull_request_close.join(", ")}. #{HELP}")
             end
           end
         end
@@ -89,6 +91,24 @@ module RuboCop
           events.select { |event| event.method_name == :issue_close }
             .map { |event| validate_issue_close_args(event.arguments) }
             .compact
+        end
+
+        # @param events [Array<SmartTodo::Todo::CallNode>]
+        # @return [Array<String>]
+        def invalid_pull_request_close_events(events)
+          events.select { |event| event.method_name == :pull_request_close }
+            .map { |event| validate_pull_request_close_args(event.arguments) }
+            .compact
+        end
+
+        # @param args [Array]
+        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
+        def validate_pull_request_close_args(args)
+          if args.size != 3
+            "Invalid pull_request_close event: Expected 3 arguments (organization, repo, pr_number), got #{args.size}"
+          elsif !args.all? { |arg| arg.is_a?(String) }
+            "Invalid pull_request_close event: Arguments must be strings"
+          end
         end
 
         # @param args [Array]
