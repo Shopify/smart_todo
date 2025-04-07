@@ -304,6 +304,40 @@ module SmartTodo
       RUBY
     end
 
+    def test_add_offense_when_todo_has_missing_ruby_version_arguments
+      expect_offense(<<~RUBY)
+        # TODO(on: ruby_version(), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid ruby_version event: Expected at least 1 argument (version requirement), got 0. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_non_string_ruby_version_requirements
+      expect_offense(<<~RUBY)
+        # TODO(on: ruby_version(123), to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid ruby_version event: Version requirements must be strings. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_does_not_add_offense_when_todo_has_valid_ruby_version
+      expect_no_offense(<<~RUBY)
+        # TODO(on: ruby_version('>= 2.5'), to: 'john@example.com')
+        def hello
+        end
+
+        # TODO(on: ruby_version('>= 2.5', '< 3.0'), to: 'john@example.com')
+        def hello
+        end
+
+        # TODO(on: ruby_version('~> 2.5'), to: 'john@example.com')
+        def hello
+        end
+      RUBY
+    end
+
     private
 
     def expected_message

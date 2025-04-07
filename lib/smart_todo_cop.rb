@@ -40,6 +40,8 @@ module RuboCop
               add_offense(comment, message: "#{invalid_gem_release.join(", ")}. #{HELP}")
             elsif (invalid_gem_bump = invalid_gem_bump_events(metadata.events)).any?
               add_offense(comment, message: "#{invalid_gem_bump.join(", ")}. #{HELP}")
+            elsif (invalid_ruby_version = invalid_ruby_version_events(metadata.events)).any?
+              add_offense(comment, message: "#{invalid_ruby_version.join(", ")}. #{HELP}")
             end
           end
         end
@@ -119,6 +121,24 @@ module RuboCop
           events.select { |event| event.method_name == :gem_bump }
             .map { |event| validate_gem_bump_args(event.arguments) }
             .compact
+        end
+
+        # @param events [Array<SmartTodo::Todo::CallNode>]
+        # @return [Array<String>]
+        def invalid_ruby_version_events(events)
+          events.select { |event| event.method_name == :ruby_version }
+            .map { |event| validate_ruby_version_args(event.arguments) }
+            .compact
+        end
+
+        # @param args [Array]
+        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
+        def validate_ruby_version_args(args)
+          if args.empty?
+            "Invalid ruby_version event: Expected at least 1 argument (version requirement), got 0"
+          elsif !args.all? { |arg| arg.is_a?(String) }
+            "Invalid ruby_version event: Version requirements must be strings"
+          end
         end
 
         # @param args [Array]
