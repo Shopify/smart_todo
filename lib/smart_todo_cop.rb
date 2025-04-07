@@ -14,6 +14,14 @@ module RuboCop
         HELP = "For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax"
         MSG = "Don't write regular TODO comments. Write SmartTodo compatible syntax comments. #{HELP}"
 
+        EVENTS = [
+          :issue_close,
+          :pull_request_close,
+          :gem_release,
+          :gem_bump,
+          :ruby_version,
+        ].freeze
+
         # @param processed_source [RuboCop::ProcessedSource]
         # @return [void]
         def on_new_investigation
@@ -32,16 +40,8 @@ module RuboCop
               add_offense(comment, message: "Invalid event assignee. This method only accepts strings. #{HELP}")
             elsif (invalid_dates = invalid_dates(metadata.events)).any?
               add_offense(comment, message: "Invalid date format: #{invalid_dates.join(", ")}. #{HELP}")
-            elsif (invalid_issue_close = invalid_issue_close_events(metadata.events)).any?
-              add_offense(comment, message: "#{invalid_issue_close.join(", ")}. #{HELP}")
-            elsif (invalid_pull_request_close = invalid_pull_request_close_events(metadata.events)).any?
-              add_offense(comment, message: "#{invalid_pull_request_close.join(", ")}. #{HELP}")
-            elsif (invalid_gem_release = invalid_gem_release_events(metadata.events)).any?
-              add_offense(comment, message: "#{invalid_gem_release.join(", ")}. #{HELP}")
-            elsif (invalid_gem_bump = invalid_gem_bump_events(metadata.events)).any?
-              add_offense(comment, message: "#{invalid_gem_bump.join(", ")}. #{HELP}")
-            elsif (invalid_ruby_version = invalid_ruby_version_events(metadata.events)).any?
-              add_offense(comment, message: "#{invalid_ruby_version.join(", ")}. #{HELP}")
+            elsif (invalid_event = validate_events(metadata.events)).any?
+              add_offense(comment, message: "#{invalid_event.join(", ")}. #{HELP}")
             end
           end
         end
@@ -93,42 +93,40 @@ module RuboCop
 
         # @param events [Array<SmartTodo::Todo::CallNode>]
         # @return [Array<String>]
-        def invalid_issue_close_events(events)
-          events.select { |event| event.method_name == :issue_close }
-            .map { |event| validate_issue_close_args(event.arguments) }
-            .compact
+        def validate_events(events)
+          EVENTS.flat_map do |event_type|
+            events.select { |event| event.method_name == event_type }
+              .map { |event| send(validate_method(event_type), event.arguments) }
+              .compact
+          end
         end
 
-        # @param events [Array<SmartTodo::Todo::CallNode>]
-        # @return [Array<String>]
-        def invalid_pull_request_close_events(events)
-          events.select { |event| event.method_name == :pull_request_close }
-            .map { |event| validate_pull_request_close_args(event.arguments) }
-            .compact
+        def validate_method(event_type)
+          "validate_#{event_type}_args"
         end
 
-        # @param events [Array<SmartTodo::Todo::CallNode>]
-        # @return [Array<String>]
-        def invalid_gem_release_events(events)
-          events.select { |event| event.method_name == :gem_release }
-            .map { |event| validate_gem_release_args(event.arguments) }
-            .compact
+        # @param args [Array]
+        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
+        def validate_issue_close_args(args)
+          validate_fixed_arity_args(args, 3, "issue_close", ["organization", "repo", "issue_number"])
         end
 
-        # @param events [Array<SmartTodo::Todo::CallNode>]
-        # @return [Array<String>]
-        def invalid_gem_bump_events(events)
-          events.select { |event| event.method_name == :gem_bump }
-            .map { |event| validate_gem_bump_args(event.arguments) }
-            .compact
+        # @param args [Array]
+        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
+        def validate_pull_request_close_args(args)
+          validate_fixed_arity_args(args, 3, "pull_request_close", ["organization", "repo", "pr_number"])
         end
 
-        # @param events [Array<SmartTodo::Todo::CallNode>]
-        # @return [Array<String>]
-        def invalid_ruby_version_events(events)
-          events.select { |event| event.method_name == :ruby_version }
-            .map { |event| validate_ruby_version_args(event.arguments) }
-            .compact
+        # @param args [Array]
+        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
+        def validate_gem_release_args(args)
+          validate_gem_args(args, "gem_release")
+        end
+
+        # @param args [Array]
+        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
+        def validate_gem_bump_args(args)
+          validate_gem_args(args, "gem_bump")
         end
 
         # @param args [Array]
@@ -141,47 +139,25 @@ module RuboCop
           end
         end
 
-        # @param args [Array]
-        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
-        def validate_gem_bump_args(args)
-          if args.empty?
-            "Invalid gem_bump event: Expected at least 1 argument (gem_name), got 0"
-          elsif !args[0].is_a?(String)
-            "Invalid gem_bump event: First argument (gem_name) must be a string"
-          elsif args.size > 1 && !args[1..].all? { |arg| arg.is_a?(String) }
-            "Invalid gem_bump event: Version requirements must be strings"
-          end
-        end
-
-        # @param args [Array]
-        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
-        def validate_gem_release_args(args)
-          if args.empty?
-            "Invalid gem_release event: Expected at least 1 argument (gem_name), got 0"
-          elsif !args[0].is_a?(String)
-            "Invalid gem_release event: First argument (gem_name) must be a string"
-          elsif args.size > 1 && !args[1..].all? { |arg| arg.is_a?(String) }
-            "Invalid gem_release event: Version requirements must be strings"
-          end
-        end
-
-        # @param args [Array]
-        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
-        def validate_pull_request_close_args(args)
-          if args.size != 3
-            "Invalid pull_request_close event: Expected 3 arguments (organization, repo, pr_number), got #{args.size}"
+        # Helper method for validating fixed arity events
+        def validate_fixed_arity_args(args, expected_count, event_name, arg_names)
+          if args.size != expected_count
+            message = "Invalid #{event_name} event: Expected #{expected_count} arguments "
+            message += "(#{arg_names.join(", ")}), got #{args.size}"
+            message
           elsif !args.all? { |arg| arg.is_a?(String) }
-            "Invalid pull_request_close event: Arguments must be strings"
+            "Invalid #{event_name} event: Arguments must be strings"
           end
         end
 
-        # @param args [Array]
-        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
-        def validate_issue_close_args(args)
-          if args.size != 3
-            "Invalid issue_close event: Expected 3 arguments (organization, repo, issue_number), got #{args.size}"
-          elsif !args.all? { |arg| arg.is_a?(String) }
-            "Invalid issue_close event: Arguments must be strings"
+        # Helper method for validating gem-related events
+        def validate_gem_args(args, event_name)
+          if args.empty?
+            "Invalid #{event_name} event: Expected at least 1 argument (gem_name), got 0"
+          elsif !args[0].is_a?(String)
+            "Invalid #{event_name} event: First argument (gem_name) must be a string"
+          elsif args.size > 1 && !args[1..].all? { |arg| arg.is_a?(String) }
+            "Invalid #{event_name} event: Version requirements must be strings"
           end
         end
       end
