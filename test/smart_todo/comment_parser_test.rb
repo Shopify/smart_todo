@@ -163,5 +163,29 @@ module SmartTodo
       assert_equal(:date, todo[0].events[0].method_name)
       assert_equal(["john@example.com"], todo[0].assignees)
     end
+
+    def test_parse_fixme_and_creates_metadata
+      ruby_code = <<~RUBY
+        # FIXME(on: date('2019-08-04'), to: 'john@example.com')
+        def hello
+        end
+      RUBY
+
+      todo = CommentParser.parse(ruby_code)
+      assert_equal(:date, todo[0].events[0].method_name)
+      assert_equal(["john@example.com"], todo[0].assignees)
+    end
+
+    def test_parse_optimize_and_creates_metadata
+      ruby_code = <<~RUBY
+        # OPTIMIZE(on: date('2019-08-04'), to: 'john@example.com')
+        def hello
+        end
+      RUBY
+
+      todo = CommentParser.parse(ruby_code)
+      assert_equal(:date, todo[0].events[0].method_name)
+      assert_equal(["john@example.com"], todo[0].assignees)
+    end
   end
 end

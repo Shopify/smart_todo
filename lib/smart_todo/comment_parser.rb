@@ -2,6 +2,9 @@
 
 module SmartTodo
   class CommentParser
+    SUPPORTED_TAGS = ["TODO", "FIXME", "OPTIMIZE"].freeze
+    TAG_PATTERN = /^#\s(#{SUPPORTED_TAGS.join("|")})\(/
+
     attr_reader :todos
 
     def initialize
@@ -54,7 +57,7 @@ module SmartTodo
 
         source = comment.location.slice
 
-        if source.match?(/^#\sTODO\(/)
+        if source.match?(TAG_PATTERN)
           todos << current_todo if current_todo
           current_todo = Todo.new(source, filepath)
         elsif current_todo && (indent = source[/^#(\s*)/, 1].length) && (indent - current_todo.indent == 2)

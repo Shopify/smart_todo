@@ -338,6 +338,58 @@ module SmartTodo
       RUBY
     end
 
+    def test_add_offense_when_fixme_is_a_regular_fixme
+      expect_offense(<<~RUBY)
+        # FIXME: Do this on January first
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_optimize_is_a_regular_optimize
+      expect_offense(<<~RUBY)
+        # OPTIMIZE: Do this on January first
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
+        def hello
+        end
+      RUBY
+    end
+
+    def test_does_not_add_offense_when_fixme_is_a_smart_fixme
+      expect_no_offense(<<~RUBY)
+        # FIXME(on: date('2019-08-04'), to: 'john@example.com')
+        def hello
+        end
+      RUBY
+    end
+
+    def test_does_not_add_offense_when_optimize_is_a_smart_optimize
+      expect_no_offense(<<~RUBY)
+        # OPTIMIZE(on: date('2019-08-04'), to: 'john@example.com')
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_fixme_has_invalid_format
+      expect_offense(<<~RUBY)
+        # FIXME(on: '2019-08-04', to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid TODO format: Incorrect `:on` event format: "2019-08-04". For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_optimize_has_invalid_format
+      expect_offense(<<~RUBY)
+        # OPTIMIZE(on: '2019-08-04', to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid TODO format: Incorrect `:on` event format: "2019-08-04". For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
     private
 
     def expected_message
