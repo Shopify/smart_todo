@@ -7,7 +7,8 @@ module SmartTodo
     class Slack < Base
       class << self
         def validate_options!(options)
-          options[:slack_token] ||= ENV.fetch("SMART_TODO_SLACK_TOKEN") { raise(ArgumentError, "Missing :slack_token") }
+          options[:slack_token] ||= ENV.fetch("SMART_TODO_SLACK_TOKEN", "")
+          raise(ArgumentError, "Missing :slack_token") if options[:slack_token].empty?
 
           options.fetch(:fallback_channel) { raise(ArgumentError, "Missing :fallback_channel") }
         end
