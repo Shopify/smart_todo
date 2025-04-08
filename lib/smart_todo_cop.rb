@@ -13,13 +13,18 @@ module RuboCop
       class SmartTodoCop < Base
         HELP = "For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax"
         MSG = "Don't write regular TODO comments. Write SmartTodo compatible syntax comments. #{HELP}"
-        TODO_PATTERN = /^#\s@?(?:#{::SmartTodo::CommentParser::SUPPORTED_TAGS.join("|")})/i
+        TODO_PATTERN = /^#\s@?(#{::SmartTodo::CommentParser::SUPPORTED_TAGS.join("|")})/i
 
         # @param processed_source [RuboCop::ProcessedSource]
         # @return [void]
         def on_new_investigation
           processed_source.comments.each do |comment|
-            next unless TODO_PATTERN.match?(comment.text)
+            next unless (match = TODO_PATTERN.match(comment.text))
+
+            if match[1] != match[1].upcase
+              add_offense(comment)
+              next
+            end
 
             metadata = metadata(comment.text)
 

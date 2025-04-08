@@ -390,6 +390,33 @@ module SmartTodo
       RUBY
     end
 
+    def test_add_offense_when_todo_tag_is_lower_case
+      expect_offense(<<~RUBY)
+        # todo(on: '2019-08-04', to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_fixme_tag_is_lower_case
+      expect_offense(<<~RUBY)
+        # fixme(on: '2019-08-04', to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_optimize_tag_is_lower_case
+      expect_offense(<<~RUBY)
+        # optimize(on: '2019-08-04', to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
+        def hello
+        end
+      RUBY
+    end
+
     def test_add_offense_when_at_todo_is_used
       expect_offense(<<~RUBY)
         # @todo Do this on January first
