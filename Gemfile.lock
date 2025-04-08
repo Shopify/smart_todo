@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    smart_todo (1.9.2)
+    smart_todo (1.10.0)
       prism (~> 1.0)
 
 GEM
