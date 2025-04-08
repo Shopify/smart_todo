@@ -435,24 +435,6 @@ module SmartTodo
       RUBY
     end
 
-    def test_add_offense_when_at_todo_mixed_case_is_used
-      expect_offense(<<~RUBY)
-        # @Todo Do this on January first
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
-        def hello
-        end
-      RUBY
-    end
-
-    def test_add_offense_when_at_todo_alternating_case_is_used
-      expect_offense(<<~RUBY)
-        # @ToDo Do this on January first
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
-        def hello
-        end
-      RUBY
-    end
-
     def test_add_offense_when_at_fixme_is_used
       expect_offense(<<~RUBY)
         # @fixme Do this on January first
@@ -465,24 +447,6 @@ module SmartTodo
     def test_add_offense_when_at_fixme_uppercase_is_used
       expect_offense(<<~RUBY)
         # @FIXME Do this on January first
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
-        def hello
-        end
-      RUBY
-    end
-
-    def test_add_offense_when_at_fixme_mixed_case_is_used
-      expect_offense(<<~RUBY)
-        # @Fixme Do this on January first
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
-        def hello
-        end
-      RUBY
-    end
-
-    def test_add_offense_when_at_fixme_alternating_case_is_used
-      expect_offense(<<~RUBY)
-        # @FiXmE Do this on January first
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
         def hello
         end
@@ -507,19 +471,17 @@ module SmartTodo
       RUBY
     end
 
-    def test_add_offense_when_at_optimize_mixed_case_is_used
-      expect_offense(<<~RUBY)
-        # @Optimize Do this on January first
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
+    def test_optimize_used_in_free_test_are_valid
+      expect_no_offense(<<~RUBY)
+        # optimized thing
         def hello
         end
       RUBY
     end
 
-    def test_add_offense_when_at_optimize_alternating_case_is_used
-      expect_offense(<<~RUBY)
-        # @OpTiMiZe Do this on January first
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
+    def test_tags_used_in_free_test_are_valid
+      expect_no_offense(<<~RUBY)
+        # Todo list
         def hello
         end
       RUBY
