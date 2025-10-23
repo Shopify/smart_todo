@@ -108,8 +108,9 @@ module SmartTodo
         @errors.concat(todo.errors)
 
         if event_met
-          # Append context information if present
-          if todo.context
+          # Append context information if present (but not for issue_close or pull_request_close)
+          # These events already reference specific issues/PRs
+          if todo.context && should_apply_context?(event_met)
             org, repo, issue_number = todo.context.arguments
             context_message = events.issue_context(org, repo, issue_number)
             event_message = "#{event_message}\n\n#{context_message}" if context_message
@@ -120,6 +121,13 @@ module SmartTodo
       end
 
       dispatches
+    end
+
+    private
+
+    def should_apply_context?(event)
+      # Context should not be applied to events that already reference issues/PRs
+      ![:issue_close, :pull_request_close].include?(event.method_name)
     end
 
     def process_dispatches(dispatches)

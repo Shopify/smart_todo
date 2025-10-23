@@ -38,7 +38,7 @@ module RuboCop
               add_offense(comment, message: "Invalid event assignee. This method only accepts strings. #{HELP}")
             elsif (invalid_events = validate_events(metadata.events)).any?
               add_offense(comment, message: "#{invalid_events.join(". ")}. #{HELP}")
-            elsif metadata.context && (context_error = validate_context(metadata.context))
+            elsif metadata.context && (context_error = validate_context(metadata.context, metadata.events))
               add_offense(comment, message: "#{context_error}. #{HELP}")
             end
           end
@@ -106,8 +106,15 @@ module RuboCop
         end
 
         # @param context [SmartTodo::Todo::CallNode]
+        # @param events [Array<SmartTodo::Todo::CallNode>]
         # @return [String, nil] Returns error message if context is invalid, nil if valid
-        def validate_context(context)
+        def validate_context(context, events)
+          # Check if any event is issue_close or pull_request_close
+          restricted_events = events.select { |e| [:issue_close, :pull_request_close].include?(e.method_name) }
+          if restricted_events.any?
+            return "Invalid context: context attribute cannot be used with #{restricted_events.first.method_name} event"
+          end
+
           if context.method_name != :issue
             "Invalid context: only issue() function is supported"
           else

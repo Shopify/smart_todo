@@ -548,6 +548,24 @@ module SmartTodo
       RUBY
     end
 
+    def test_add_offense_when_todo_has_context_with_issue_close_event
+      expect_offense(<<~RUBY)
+        # TODO(on: issue_close('shopify', 'smart_todo', '100'), to: 'dev@example.com', context: issue('shopify', 'smart_todo', '123'))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid context: context attribute cannot be used with issue_close event. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_context_with_pull_request_close_event
+      expect_offense(<<~RUBY)
+        # TODO(on: pull_request_close('shopify', 'smart_todo', '200'), to: 'dev@example.com', context: issue('shopify', 'smart_todo', '123'))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid context: context attribute cannot be used with pull_request_close event. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
     private
 
     def expected_message
