@@ -38,6 +38,8 @@ module RuboCop
               add_offense(comment, message: "Invalid event assignee. This method only accepts strings. #{HELP}")
             elsif (invalid_events = validate_events(metadata.events)).any?
               add_offense(comment, message: "#{invalid_events.join(". ")}. #{HELP}")
+            elsif metadata.context && (context_error = validate_context(metadata.context))
+              add_offense(comment, message: "#{context_error}. #{HELP}")
             end
           end
         end
@@ -101,6 +103,16 @@ module RuboCop
         # @return [String, nil] Returns error message if arguments are invalid, nil if valid
         def validate_pull_request_close_args(args)
           validate_fixed_arity_args(args, 3, "pull_request_close", ["organization", "repo", "pr_number"])
+        end
+
+        # @param context [SmartTodo::Todo::CallNode]
+        # @return [String, nil] Returns error message if context is invalid, nil if valid
+        def validate_context(context)
+          if context.method_name != :issue
+            "Invalid context: only issue() function is supported"
+          else
+            validate_fixed_arity_args(context.arguments, 3, "context issue", ["organization", "repo", "issue_number"])
+          end
         end
 
         # @param args [Array]

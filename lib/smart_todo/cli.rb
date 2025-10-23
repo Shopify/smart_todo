@@ -106,7 +106,17 @@ module SmartTodo
         end
 
         @errors.concat(todo.errors)
-        dispatches << [event_message, todo] if event_met
+
+        if event_met
+          # Append context information if present
+          if todo.context
+            org, repo, issue_number = todo.context.arguments
+            context_message = events.issue_context(org, repo, issue_number)
+            event_message = "#{event_message}\n\n#{context_message}" if context_message
+          end
+
+          dispatches << [event_message, todo]
+        end
       end
 
       dispatches

@@ -157,6 +157,32 @@ module SmartTodo
       end
     end
 
+    # Retrieve context information for an issue
+    # This is used when a TODO has a context: issue() attribute
+    #
+    # @param organization [String] the GitHub organization name
+    # @param repo [String] the GitHub repo name
+    # @param issue_number [String, Integer]
+    # @return [String, nil]
+    def issue_context(organization, repo, issue_number)
+      headers = github_headers(organization, repo)
+      response = github_client.get("/repos/#{organization}/#{repo}/issues/#{issue_number}", headers)
+
+      if response.code_type < Net::HTTPClientError
+        return nil
+      else
+        issue = JSON.parse(response.body)
+        state = issue["state"]
+        title = issue["title"]
+        assignee = issue["assignee"] ? "@#{issue["assignee"]["login"]}" : "unassigned"
+
+        "📌 Context: Issue ##{issue_number} - \"#{title}\" [#{state}] (#{assignee}) - " \
+          "https://github.com/#{organization}/#{repo}/issues/#{issue_number}"
+      end
+    rescue
+      nil
+    end
+
     # Check if the installed ruby version meets requirements.
     #
     # @param requirements [Array<String>] a list of version specifiers

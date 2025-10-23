@@ -104,6 +104,87 @@ module SmartTodo
       )
     end
 
+    def test_includes_context_when_date_is_met_with_issue_context
+      ruby_code = <<~EOM
+        # TODO(on: date('2015-03-01'), to: 'john@example.com', context: issue('shopify', 'smart_todo', '123'))
+        #   Implement the caching strategy discussed in the issue
+        def hello
+        end
+      EOM
+
+      stub_request(:get, /api.github.com/)
+        .to_return(body: JSON.dump(
+          state: "open",
+          title: "Add caching support",
+          number: 123,
+          assignee: { login: "developer" },
+        ))
+
+      generate_ruby_file(ruby_code) do |file|
+        run_cli(file)
+      end
+
+      assert_slack_message_sent(
+        "Hello :wave:,",
+        "We are past the *2015-03-01* due date",
+        "📌 Context: Issue #123",
+        "Add caching support",
+        "Implement the caching strategy discussed in the issue",
+      )
+    end
+
+    def test_includes_context_when_gem_release_is_met_with_issue_context
+      ruby_code = <<~EOM
+        # TODO(on: gem_release('rails', '> 5.1'), to: 'john@example.com', context: issue('rails', 'rails', '456'))
+        #   Upgrade to new Rails version as per issue
+        def hello
+        end
+      EOM
+
+      stub_request(:get, /rubygems.org/)
+        .to_return(body: JSON.dump([{ number: "5.1.1" }]))
+
+      stub_request(:get, /api.github.com/)
+        .to_return(body: JSON.dump(
+          state: "closed",
+          title: "Rails upgrade needed",
+          number: 456,
+          assignee: nil,
+        ))
+
+      generate_ruby_file(ruby_code) do |file|
+        run_cli(file)
+      end
+
+      assert_slack_message_sent(
+        "Hello :wave:,",
+        "The gem *rails* was released to version *5.1.1*",
+        "📌 Context: Issue #456",
+        "Rails upgrade needed",
+        "Upgrade to new Rails version as per issue",
+      )
+    end
+
+    def test_context_does_not_affect_todos_without_events_triggered
+      ruby_code = <<~EOM
+        # TODO(on: date('2099-12-31'), to: 'john@example.com', context: issue('shopify', 'smart_todo', '789'))
+        #   This TODO is not ready yet
+        def hello
+        end
+      EOM
+
+      # Should not make any GitHub API calls since the event is not triggered
+      generate_ruby_file(ruby_code) do |file|
+        stub_slack_request
+        CLI.new.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"', "--dispatcher", "slack"])
+      end
+
+      # No slack message should be sent
+      assert_not_requested(:post, /chat.postMessage/)
+      # No GitHub API call should be made for context
+      assert_not_requested(:get, /api.github.com/)
+    end
+
     private
 
     def assert_slack_message_sent(*messages)

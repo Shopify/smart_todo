@@ -40,6 +40,14 @@ When the TODO's event is met (i.e. a certain date is reached), the TODO's assign
   end
 ```
 
+You can also add context to your TODOs by linking them to GitHub issues:
+```ruby
+  # TODO(on: date('2025-01-01'), to: 'team@example.com', context: issue('shopify', 'smart_todo', '108'))
+  #   Implement the caching strategy discussed in the issue
+  def process_order
+  end
+```
+
 Documentation
 ----------------
 Please check out the GitHub [wiki](https://github.com/Shopify/smart_todo/wiki) for documentation and example on how to setup SmartTodo in your project.

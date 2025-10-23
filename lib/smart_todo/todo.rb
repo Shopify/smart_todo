@@ -4,6 +4,7 @@ module SmartTodo
   class Todo
     attr_reader :filepath, :comment, :indent
     attr_reader :events, :assignees, :errors
+    attr_accessor :context
 
     def initialize(source, filepath = "-e")
       @filepath = filepath
@@ -12,6 +13,7 @@ module SmartTodo
 
       @events = []
       @assignees = []
+      @context = nil
       @errors = []
 
       parse(source[(indent + 1)..])
@@ -66,6 +68,18 @@ module SmartTodo
             end
           when :to
             metadata.assignees << visit(element.value)
+          when :context
+            value = visit(element.value)
+
+            if value.is_a?(CallNode) && value.method_name == :issue
+              if value.arguments.length == 3 && value.arguments.all? { |arg| arg.is_a?(String) }
+                metadata.context = value
+              else
+                metadata.errors << "Incorrect `:context` format: issue() requires exactly 3 string arguments (org, repo, issue_number)"
+              end
+            else
+              metadata.errors << "Incorrect `:context` format: only issue() function is supported"
+            end
           end
         end
       end
