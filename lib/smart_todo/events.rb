@@ -132,6 +132,35 @@ module SmartTodo
       end
     end
 
+    # Pin a TODO to a GitHub issue for tracking purposes
+    # Unlike issue_close, this will always return issue information regardless of state
+    #
+    # @param organization [String] the GitHub organization name
+    # @param repo [String] the GitHub repo name
+    # @param issue_number [String, Integer]
+    # @return [String] Always returns a message with issue information
+    def issue_pin(organization, repo, issue_number)
+      headers = github_headers(organization, repo)
+      response = github_client.get("/repos/#{organization}/#{repo}/issues/#{issue_number}", headers)
+
+      if response.code_type < Net::HTTPClientError
+        <<~EOM
+          I can't retrieve the information from the issue *#{issue_number}* in the *#{organization}/#{repo}* repository.
+
+          If the repository is a private one, make sure to export the `#{GITHUB_TOKEN}`
+          environment variable with a correct GitHub token.
+        EOM
+      else
+        issue = JSON.parse(response.body)
+        state = issue["state"]
+        title = issue["title"]
+        assignee = issue["assignee"] ? "@#{issue["assignee"]["login"]}" : "unassigned"
+
+        "📌 Pinned to issue ##{issue_number}: \"#{title}\" [#{state}] (#{assignee}) - " \
+          "https://github.com/#{organization}/#{repo}/issues/#{issue_number}"
+      end
+    end
+
     # Check if the pull request +pr_number+ is closed
     #
     # @param organization [String] the GitHub organization name
