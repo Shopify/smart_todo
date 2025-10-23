@@ -40,16 +40,6 @@ When the TODO's event is met (i.e. a certain date is reached), the TODO's assign
   end
 ```
 
-**Pin TODOs to GitHub Issues**
-```ruby
-  # TODO(on: issue_pin('shopify', 'smart_todo', '123'))
-  #   Remember to handle the edge cases discussed in the issue
-  def process_order
-  end
-```
-
-The `issue_pin` event allows you to link TODO comments to GitHub issues without requiring the issue to be closed. This is perfect for tracking work items and maintaining context between your code and GitHub issues.
-
 Documentation
 ----------------
 Please check out the GitHub [wiki](https://github.com/Shopify/smart_todo/wiki) for documentation and example on how to setup SmartTodo in your project.

@@ -149,42 +149,6 @@ module SmartTodo
       RUBY
     end
 
-    def test_does_not_add_offense_when_using_issue_pin_without_to_parameter
-      expect_no_offense(<<~RUBY)
-        # TODO(on: issue_pin('shopify', 'smart_todo', '123'))
-        #   Remember to handle the edge cases
-        def hello
-        end
-      RUBY
-    end
-
-    def test_does_not_add_offense_when_using_issue_pin_with_to_parameter
-      expect_no_offense(<<~RUBY)
-        # TODO(on: issue_pin('shopify', 'smart_todo', '456'), to: 'team@example.com')
-        #   Update the documentation
-        def hello
-        end
-      RUBY
-    end
-
-    def test_adds_offense_when_issue_pin_has_wrong_number_of_arguments
-      expect_offense(<<~RUBY)
-        # TODO(on: issue_pin('shopify', 'smart_todo'))
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid issue_pin event: Expected 3 arguments (organization, repo, issue_number), got 2. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
-        def hello
-        end
-      RUBY
-    end
-
-    def test_adds_offense_when_issue_pin_has_non_string_arguments
-      expect_offense(<<~RUBY)
-        # TODO(on: issue_pin('shopify', 'smart_todo', 123))
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid issue_pin event: Arguments must be strings. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
-        def hello
-        end
-      RUBY
-    end
-
     def test_does_not_add_offense_when_comment_is_not_a_todo
       expect_no_offense(<<~RUBY)
         # @return [Void]

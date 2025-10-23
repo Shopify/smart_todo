@@ -53,15 +53,9 @@ module RuboCop
         # @param metadata [SmartTodo::Parser::Visitor]
         # @return [true, false]
         def smart_todo?(metadata)
-          has_valid_events = metadata.events.any? &&
-            metadata.events.all? { |event| event.is_a?(::SmartTodo::Todo::CallNode) }
-
-          # Allow issue_pin without assignees (to: parameter)
-          if has_valid_events && metadata.events.any? { |e| e.method_name == :issue_pin }
-            true
-          else
-            has_valid_events && metadata.assignees.any?
-          end
+          metadata.events.any? &&
+            metadata.events.all? { |event| event.is_a?(::SmartTodo::Todo::CallNode) } &&
+            metadata.assignees.any?
         end
 
         # @param assignees [Array]
@@ -101,12 +95,6 @@ module RuboCop
         # @return [String, nil] Returns error message if arguments are invalid, nil if valid
         def validate_issue_close_args(args)
           validate_fixed_arity_args(args, 3, "issue_close", ["organization", "repo", "issue_number"])
-        end
-
-        # @param args [Array]
-        # @return [String, nil] Returns error message if arguments are invalid, nil if valid
-        def validate_issue_pin_args(args)
-          validate_fixed_arity_args(args, 3, "issue_pin", ["organization", "repo", "issue_number"])
         end
 
         # @param args [Array]

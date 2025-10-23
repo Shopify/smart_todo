@@ -104,62 +104,6 @@ module SmartTodo
       )
     end
 
-    def test_outputs_issue_pin_information_without_sending_notification
-      ruby_code = <<~EOM
-        # TODO(on: issue_pin('shopify', 'smart_todo', '123'))
-        #   Remember to update the caching strategy
-        def hello
-        end
-      EOM
-
-      stub_request(:get, /api.github.com/)
-        .to_return(body: JSON.dump(
-          state: "open",
-          title: "Improve caching",
-          number: 123,
-          assignee: { login: "developer" },
-        ))
-
-      generate_ruby_file(ruby_code) do |file|
-        # Run CLI with output dispatcher to see results
-        output = capture_subprocess_io do
-          CLI.new.run([file.path, "--dispatcher", "output"])
-        end.join
-
-        # Check that the issue information is in the output
-        assert_match(/📌 Pinned to issue #123/, output)
-        assert_match(/Improve caching/, output)
-      end
-    end
-
-    def test_sends_notification_when_issue_pin_has_assignee
-      ruby_code = <<~EOM
-        # TODO(on: issue_pin('shopify', 'smart_todo', '456'), to: 'team@example.com')
-        #   Don't forget about the refactoring
-        def hello
-        end
-      EOM
-
-      stub_request(:get, /api.github.com/)
-        .to_return(body: JSON.dump(
-          state: "closed",
-          title: "Refactor authentication",
-          number: 456,
-          assignee: nil,
-        ))
-
-      generate_ruby_file(ruby_code) do |file|
-        run_cli(file)
-      end
-
-      assert_slack_message_sent(
-        "Hello :wave:,",
-        "📌 Pinned to issue #456",
-        "Refactor authentication",
-        "Don't forget about the refactoring",
-      )
-    end
-
     private
 
     def assert_slack_message_sent(*messages)
