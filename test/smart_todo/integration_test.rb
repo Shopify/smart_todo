@@ -173,15 +173,12 @@ module SmartTodo
         end
       EOM
 
-      # Should not make any GitHub API calls since the event is not triggered
       generate_ruby_file(ruby_code) do |file|
         stub_slack_request
         CLI.new.run([file.path, "--slack_token", "123", "--fallback_channel", '#general"', "--dispatcher", "slack"])
       end
 
-      # No slack message should be sent
       assert_not_requested(:post, /chat.postMessage/)
-      # No GitHub API call should be made for context
       assert_not_requested(:get, /api.github.com/)
     end
 
@@ -206,7 +203,6 @@ module SmartTodo
         "This context should be ignored",
       )
 
-      # Should NOT make a call for issue 999 (the context)
       assert_not_requested(:get, %r{api.github.com.*issues/999})
     end
 
