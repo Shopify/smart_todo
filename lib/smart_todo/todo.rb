@@ -75,7 +75,8 @@ module SmartTodo
               if value.arguments.length == 3 && value.arguments.all? { |arg| arg.is_a?(String) }
                 metadata.context = value
               else
-                metadata.errors << "Incorrect `:context` format: issue() requires exactly 3 string arguments (org, repo, issue_number)"
+                metadata.errors << "Incorrect `:context` format: issue() requires exactly 3 string arguments " \
+                  "(org, repo, issue_number)"
               end
             else
               metadata.errors << "Incorrect `:context` format: only issue() function is supported"

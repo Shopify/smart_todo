@@ -193,7 +193,7 @@ module SmartTodo
         end
       EOM
 
-      stub_request(:get, /api.github.com.*issues\/100/)
+      stub_request(:get, %r{api.github.com.*issues/100})
         .to_return(body: JSON.dump(state: "closed"))
 
       generate_ruby_file(ruby_code) do |file|
@@ -207,7 +207,7 @@ module SmartTodo
       )
 
       # Should NOT make a call for issue 999 (the context)
-      assert_not_requested(:get, /api.github.com.*issues\/999/)
+      assert_not_requested(:get, %r{api.github.com.*issues/999})
     end
 
     private

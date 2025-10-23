@@ -169,7 +169,7 @@ module SmartTodo
       response = github_client.get("/repos/#{organization}/#{repo}/issues/#{issue_number}", headers)
 
       if response.code_type < Net::HTTPClientError
-        return nil
+        nil
       else
         issue = JSON.parse(response.body)
         state = issue["state"]
