@@ -38,8 +38,8 @@ module RuboCop
               add_offense(comment, message: "Invalid event assignee. This method only accepts strings. #{HELP}")
             elsif (invalid_events = validate_events(metadata.events)).any?
               add_offense(comment, message: "#{invalid_events.join(". ")}. #{HELP}")
-            elsif metadata.context && (context_error = validate_context(metadata.context, metadata.events))
-              add_offense(comment, message: "#{context_error}. #{HELP}")
+            elsif (context_errors = validate_context(metadata)).any?
+              add_offense(comment, message: "#{context_errors.join(". ")}. #{HELP}")
             end
           end
         end
@@ -105,20 +105,28 @@ module RuboCop
           validate_fixed_arity_args(args, 3, "pull_request_close", ["organization", "repo", "pr_number"])
         end
 
-        # @param context [SmartTodo::Todo::CallNode]
-        # @param events [Array<SmartTodo::Todo::CallNode>]
-        # @return [String, nil] Returns error message if context is invalid, nil if valid
-        def validate_context(context, events)
-          # Check if any event is issue_close or pull_request_close
-          restricted_events = events.select { |e| [:issue_close, :pull_request_close].include?(e.method_name) }
+        # @param metadata [SmartTodo::Parser::Visitor] The metadata containing context and events
+        # @return [Array<String>] Returns array of error messages, empty if valid
+        def validate_context(metadata)
+          return [] unless metadata.context
+
+          context = metadata.context
+          events = metadata.events
+
+          restricted_events = events.reject { |e| ::SmartTodo::Todo.event_can_use_context?(e.method_name) }
           if restricted_events.any?
-            return "Invalid context: context attribute cannot be used with #{restricted_events.first.method_name} event"
+            event_name = restricted_events.first.method_name
+            return ["Invalid context: context attribute cannot be used with #{event_name} event"]
           end
 
           if context.method_name != :issue
-            "Invalid context: only issue() function is supported"
+            ["Invalid context: only issue() function is supported"]
+          elsif (error = validate_fixed_arity_args(
+            context.arguments, 3, "context issue", ["organization", "repo", "issue_number"]
+          ))
+            [error]
           else
-            validate_fixed_arity_args(context.arguments, 3, "context issue", ["organization", "repo", "issue_number"])
+            []
           end
         end
 

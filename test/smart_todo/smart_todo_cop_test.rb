@@ -593,5 +593,69 @@ module SmartTodo
     def cop
       @cop ||= RuboCop::Cop::SmartTodo::SmartTodoCop.new
     end
+
+    def test_validate_context_returns_empty_array_when_no_context
+      metadata = SmartTodo::Parser::Visitor.new
+      metadata.events << SmartTodo::Todo::CallNode.new(:date, ["2015-03-01"], nil)
+
+      assert_equal([], cop.send(:validate_context, metadata))
+    end
+
+    def test_validate_context_returns_error_for_issue_close_event_with_context
+      metadata = SmartTodo::Parser::Visitor.new
+      metadata.context = SmartTodo::Todo::CallNode.new(:issue, ["org", "repo", "123"], nil)
+      metadata.events << SmartTodo::Todo::CallNode.new(:issue_close, ["org", "repo", "456"], nil)
+
+      result = cop.send(:validate_context, metadata)
+      assert_equal(1, result.length)
+      assert_match(/context attribute cannot be used with issue_close event/, result.first)
+    end
+
+    def test_validate_context_returns_error_for_pull_request_close_event_with_context
+      metadata = SmartTodo::Parser::Visitor.new
+      metadata.context = SmartTodo::Todo::CallNode.new(:issue, ["org", "repo", "123"], nil)
+      metadata.events << SmartTodo::Todo::CallNode.new(:pull_request_close, ["org", "repo", "456"], nil)
+
+      result = cop.send(:validate_context, metadata)
+      assert_equal(1, result.length)
+      assert_match(/context attribute cannot be used with pull_request_close event/, result.first)
+    end
+
+    def test_validate_context_returns_error_for_non_issue_context
+      metadata = SmartTodo::Parser::Visitor.new
+      metadata.context = SmartTodo::Todo::CallNode.new(:custom_function, ["arg1", "arg2"], nil)
+      metadata.events << SmartTodo::Todo::CallNode.new(:date, ["2015-03-01"], nil)
+
+      result = cop.send(:validate_context, metadata)
+      assert_equal(1, result.length)
+      assert_match(/only issue\(\) function is supported/, result.first)
+    end
+
+    def test_validate_context_returns_error_for_wrong_number_of_arguments
+      metadata = SmartTodo::Parser::Visitor.new
+      metadata.context = SmartTodo::Todo::CallNode.new(:issue, ["org", "repo"], nil)
+      metadata.events << SmartTodo::Todo::CallNode.new(:date, ["2015-03-01"], nil)
+
+      result = cop.send(:validate_context, metadata)
+      assert_equal(1, result.length)
+      assert_match(/wrong number of arguments/, result.first)
+    end
+
+    def test_validate_context_returns_empty_array_for_valid_context
+      metadata = SmartTodo::Parser::Visitor.new
+      metadata.context = SmartTodo::Todo::CallNode.new(:issue, ["org", "repo", "123"], nil)
+      metadata.events << SmartTodo::Todo::CallNode.new(:date, ["2015-03-01"], nil)
+
+      assert_equal([], cop.send(:validate_context, metadata))
+    end
+
+    def test_validate_context_returns_empty_array_for_multiple_valid_events
+      metadata = SmartTodo::Parser::Visitor.new
+      metadata.context = SmartTodo::Todo::CallNode.new(:issue, ["org", "repo", "123"], nil)
+      metadata.events << SmartTodo::Todo::CallNode.new(:date, ["2015-03-01"], nil)
+      metadata.events << SmartTodo::Todo::CallNode.new(:gem_release, ["rails", "> 5.0"], nil)
+
+      assert_equal([], cop.send(:validate_context, metadata))
+    end
   end
 end

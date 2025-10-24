@@ -150,5 +150,52 @@ module SmartTodo
         end
       end
     end
+
+    def test_should_apply_context_returns_false_without_context
+      cli = CLI.new
+      todo = Todo.new("# TODO(on: date('2015-03-01'), to: 'john@example.com')")
+      event = Todo::CallNode.new(:date, ["2015-03-01"], nil)
+
+      refute(cli.send(:should_apply_context?, todo, event))
+    end
+
+    def test_should_apply_context_returns_false_for_issue_close_event
+      cli = CLI.new
+      todo = Todo.new("# TODO(on: issue_close('org', 'repo', '123'), to: 'john@example.com')")
+      todo.context = Todo::CallNode.new(:issue, ["org", "repo", "456"], nil)
+      event = Todo::CallNode.new(:issue_close, ["org", "repo", "123"], nil)
+
+      refute(cli.send(:should_apply_context?, todo, event))
+    end
+
+    def test_should_apply_context_returns_false_for_pull_request_close_event
+      cli = CLI.new
+      todo = Todo.new("# TODO(on: pull_request_close('org', 'repo', '123'), to: 'john@example.com')")
+      todo.context = Todo::CallNode.new(:issue, ["org", "repo", "456"], nil)
+      event = Todo::CallNode.new(:pull_request_close, ["org", "repo", "123"], nil)
+
+      refute(cli.send(:should_apply_context?, todo, event))
+    end
+
+    def test_should_apply_context_returns_true_for_regular_event_with_context
+      cli = CLI.new
+      todo = Todo.new("# TODO(on: date('2015-03-01'), to: 'john@example.com')")
+      todo.context = Todo::CallNode.new(:issue, ["org", "repo", "456"], nil)
+      event = Todo::CallNode.new(:date, ["2015-03-01"], nil)
+
+      assert(cli.send(:should_apply_context?, todo, event))
+    end
+
+    def test_append_context_if_applicable_returns_original_message_when_context_not_applicable
+      cli = CLI.new
+      todo = Todo.new("# TODO(on: issue_close('org', 'repo', '123'), to: 'john@example.com')")
+      todo.context = Todo::CallNode.new(:issue, ["org", "repo", "456"], nil)
+      event = Todo::CallNode.new(:issue_close, ["org", "repo", "123"], nil)
+      events = Events.new
+      original_message = "Original event message"
+
+      result = cli.send(:append_context_if_applicable, original_message, todo, event, events)
+      assert_equal(original_message, result)
+    end
   end
 end

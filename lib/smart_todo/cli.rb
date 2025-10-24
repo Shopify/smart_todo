@@ -139,7 +139,7 @@ module SmartTodo
     def should_apply_context?(todo, event)
       # Context should not be applied to events that already reference specific issues/PRs
       # (like issue_close or pull_request_close) since they already have that context.
-      todo.context && ![:issue_close, :pull_request_close].include?(event.method_name)
+      todo.context && Todo.event_can_use_context?(event.method_name)
     end
 
     def process_dispatches(dispatches)
