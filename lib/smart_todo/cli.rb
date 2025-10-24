@@ -109,13 +109,7 @@ module SmartTodo
 
         next unless event_met
 
-        # Append context information if present (but not for issue_close or pull_request_close)
-        # These events already reference specific issues/PRs
-        if todo.context && should_apply_context?(event_met)
-          org, repo, issue_number = todo.context.arguments
-          context_message = events.issue_context(org, repo, issue_number)
-          event_message = "#{event_message}\n\n#{context_message}" if context_message
-        end
+        event_message = append_context_if_applicable(event_message, todo, event_met, events)
 
         dispatches << [event_message, todo]
       end
@@ -125,9 +119,27 @@ module SmartTodo
 
     private
 
-    def should_apply_context?(event)
-      # Context should not be applied to events that already reference issues/PRs
-      ![:issue_close, :pull_request_close].include?(event.method_name)
+    # @param event_message [String] the original event message
+    # @param todo [Todo] the todo object that may contain context
+    # @param event [Event] the event that was met
+    # @param events [Events] the events instance for fetching issue context
+    # @return [String] the event message, potentially with context appended
+    def append_context_if_applicable(event_message, todo, event, events)
+      return event_message unless should_apply_context?(todo, event)
+
+      org, repo, issue_number = todo.context.arguments
+      context_message = events.issue_context(org, repo, issue_number)
+
+      context_message ? "#{event_message}\n\n#{context_message}" : event_message
+    end
+
+    # @param todo [Todo] the todo object to check for context
+    # @param event [Event] the event to check
+    # @return [Boolean] true if context should be applied, false otherwise
+    def should_apply_context?(todo, event)
+      # Context should not be applied to events that already reference specific issues/PRs
+      # (like issue_close or pull_request_close) since they already have that context.
+      todo.context && ![:issue_close, :pull_request_close].include?(event.method_name)
     end
 
     def process_dispatches(dispatches)
