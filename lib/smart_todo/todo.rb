@@ -4,6 +4,23 @@ module SmartTodo
   class Todo
     attr_reader :filepath, :comment, :indent
     attr_reader :events, :assignees, :errors
+    attr_accessor :context
+
+    # Events that already contain issue/PR context and therefore
+    # should not have additional context applied
+    EVENTS_WITH_IMPLICIT_CONTEXT = [:issue_close, :pull_request_close].freeze
+
+    class << self
+      # Check if an event is eligible to have context information applied.
+      # Events like issue_close and pull_request_close already reference
+      # specific issues/PRs and shouldn't have additional context.
+      #
+      # @param event_name [Symbol] the name of the event method
+      # @return [Boolean] true if the event can use context, false otherwise
+      def event_can_use_context?(event_name)
+        !EVENTS_WITH_IMPLICIT_CONTEXT.include?(event_name.to_sym)
+      end
+    end
 
     def initialize(source, filepath = "-e")
       @filepath = filepath
@@ -12,6 +29,7 @@ module SmartTodo
 
       @events = []
       @assignees = []
+      @context = nil
       @errors = []
 
       parse(source[(indent + 1)..])
@@ -66,6 +84,19 @@ module SmartTodo
             end
           when :to
             metadata.assignees << visit(element.value)
+          when :context
+            value = visit(element.value)
+
+            if value.is_a?(CallNode) && value.method_name == :issue
+              if value.arguments.length == 3 && value.arguments.all? { |arg| arg.is_a?(String) }
+                metadata.context = value
+              else
+                metadata.errors << "Incorrect `:context` format: issue() requires exactly 3 string arguments " \
+                  "(org, repo, issue_number)"
+              end
+            else
+              metadata.errors << "Incorrect `:context` format: only issue() function is supported"
+            end
           end
         end
       end

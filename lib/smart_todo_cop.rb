@@ -38,6 +38,8 @@ module RuboCop
               add_offense(comment, message: "Invalid event assignee. This method only accepts strings. #{HELP}")
             elsif (invalid_events = validate_events(metadata.events)).any?
               add_offense(comment, message: "#{invalid_events.join(". ")}. #{HELP}")
+            elsif (context_errors = validate_context(metadata)).any?
+              add_offense(comment, message: "#{context_errors.join(". ")}. #{HELP}")
             end
           end
         end
@@ -101,6 +103,31 @@ module RuboCop
         # @return [String, nil] Returns error message if arguments are invalid, nil if valid
         def validate_pull_request_close_args(args)
           validate_fixed_arity_args(args, 3, "pull_request_close", ["organization", "repo", "pr_number"])
+        end
+
+        # @param metadata [SmartTodo::Parser::Visitor] The metadata containing context and events
+        # @return [Array<String>] Returns array of error messages, empty if valid
+        def validate_context(metadata)
+          return [] unless metadata.context
+
+          context = metadata.context
+          events = metadata.events
+
+          restricted_events = events.reject { |e| ::SmartTodo::Todo.event_can_use_context?(e.method_name) }
+          if restricted_events.any?
+            event_name = restricted_events.first.method_name
+            return ["Invalid context: context attribute cannot be used with #{event_name} event"]
+          end
+
+          if context.method_name != :issue
+            ["Invalid context: only issue() function is supported"]
+          elsif (error = validate_fixed_arity_args(
+            context.arguments, 3, "context issue", ["organization", "repo", "issue_number"]
+          ))
+            [error]
+          else
+            []
+          end
         end
 
         # @param args [Array]
