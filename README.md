@@ -44,12 +44,12 @@ You can also add context to your TODOs by linking them to GitHub issues. The `co
 works with `date`, `gem_release`, `gem_bump`, and `ruby_version` events:
 
 ```ruby
-  # TODO(on: date('2025-01-01'), to: 'team@example.com', context: issue('shopify', 'smart_todo', '108'))
+  # TODO(on: date('2025-01-01'), to: 'team@example.com', context: "shopify/smart_todo#108")
   #   Implement the caching strategy discussed in the issue
   def process_order
   end
 
-  # TODO(on: gem_release('rails', '> 7.2'), to: 'dev@example.com', context: issue('rails', 'rails', '456'))
+  # TODO(on: gem_release('rails', '> 7.2'), to: 'dev@example.com', context: "rails/rails#456")
   #   Upgrade to new Rails version as discussed in the issue
   def legacy_method
   end

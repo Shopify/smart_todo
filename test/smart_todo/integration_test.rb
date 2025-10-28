@@ -106,7 +106,7 @@ module SmartTodo
 
     def test_includes_context_when_date_is_met_with_issue_context
       ruby_code = <<~EOM
-        # TODO(on: date('2015-03-01'), to: 'john@example.com', context: issue('shopify', 'smart_todo', '123'))
+        # TODO(on: date('2015-03-01'), to: 'john@example.com', context: "shopify/smart_todo#123")
         #   Implement the caching strategy discussed in the issue
         def hello
         end
@@ -135,7 +135,7 @@ module SmartTodo
 
     def test_includes_context_when_gem_release_is_met_with_issue_context
       ruby_code = <<~EOM
-        # TODO(on: gem_release('rails', '> 5.1'), to: 'john@example.com', context: issue('rails', 'rails', '456'))
+        # TODO(on: gem_release('rails', '> 5.1'), to: 'john@example.com', context: "rails/rails#456")
         #   Upgrade to new Rails version as per issue
         def hello
         end
@@ -167,7 +167,7 @@ module SmartTodo
 
     def test_context_does_not_affect_todos_without_events_triggered
       ruby_code = <<~EOM
-        # TODO(on: date('2099-12-31'), to: 'john@example.com', context: issue('shopify', 'smart_todo', '789'))
+        # TODO(on: date('2099-12-31'), to: 'john@example.com', context: "shopify/smart_todo#789")
         #   This TODO is not ready yet
         def hello
         end
@@ -184,7 +184,7 @@ module SmartTodo
 
     def test_context_ignored_with_issue_close_event
       ruby_code = <<~EOM
-        # TODO(on: issue_close('shopify', 'smart_todo', '100'), to: 'john@example.com', context: issue('shopify', 'smart_todo', '999'))
+        # TODO(on: issue_close('shopify', 'smart_todo', '100'), to: 'john@example.com', context: "shopify/smart_todo#999")
         #   This context should be ignored
         def hello
         end
