@@ -179,7 +179,7 @@ module SmartTodo
         "📌 Context: Issue ##{issue_number} - \"#{title}\" [#{state}] (#{assignee}) - " \
           "https://github.com/#{organization}/#{repo}/issues/#{issue_number}"
       end
-    rescue
+    rescue Net::HTTPError, JSON::ParserError
       nil
     end
 
