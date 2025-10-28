@@ -6,22 +6,6 @@ module SmartTodo
     attr_reader :events, :assignees, :errors
     attr_accessor :context
 
-    # Events that already contain issue/PR context and therefore
-    # should not have additional context applied
-    EVENTS_WITH_IMPLICIT_CONTEXT = [:issue_close, :pull_request_close].freeze
-
-    class << self
-      # Check if an event is eligible to have context information applied.
-      # Events like issue_close and pull_request_close already reference
-      # specific issues/PRs and shouldn't have additional context.
-      #
-      # @param event_name [Symbol] the name of the event method
-      # @return [Boolean] true if the event can use context, false otherwise
-      def event_can_use_context?(event_name)
-        !EVENTS_WITH_IMPLICIT_CONTEXT.include?(event_name.to_sym)
-      end
-    end
-
     def initialize(source, filepath = "-e")
       @filepath = filepath
       @comment = +""

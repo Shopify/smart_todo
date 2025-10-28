@@ -41,7 +41,7 @@ When the TODO's event is met (i.e. a certain date is reached), the TODO's assign
 ```
 
 You can also add context to your TODOs by linking them to GitHub issues. The `context` attribute
-works with `date`, `gem_release`, `gem_bump`, and `ruby_version` events:
+works with all events:
 
 ```ruby
   # TODO(on: date('2025-01-01'), to: 'team@example.com', context: "shopify/smart_todo#108")
@@ -53,11 +53,14 @@ works with `date`, `gem_release`, `gem_bump`, and `ruby_version` events:
   #   Upgrade to new Rails version as discussed in the issue
   def legacy_method
   end
+
+  # TODO(on: issue_close('shopify', 'smart_todo', '123'), to: 'team@example.com', context: "shopify/other-repo#456")
+  #   Update once the referenced issue is closed, see related context for details
+  def feature_flag
+  end
 ```
 
 When the TODO is triggered, the linked issue's title, state, and assignee will be included in the notification.
-
-Note: The `context` attribute is not supported with `issue_close` or `pull_request_close` events as they already reference specific issues/PRs.
 
 Documentation
 ----------------

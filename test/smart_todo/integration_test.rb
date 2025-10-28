@@ -182,16 +182,23 @@ module SmartTodo
       assert_not_requested(:get, /api.github.com/)
     end
 
-    def test_context_ignored_with_issue_close_event
+    def test_context_included_with_issue_close_event
       ruby_code = <<~EOM
         # TODO(on: issue_close('shopify', 'smart_todo', '100'), to: 'john@example.com', context: "shopify/smart_todo#999")
-        #   This context should be ignored
+        #   This context should be included
         def hello
         end
       EOM
 
       stub_request(:get, %r{api.github.com.*issues/100})
         .to_return(body: JSON.dump(state: "closed"))
+
+      stub_request(:get, %r{api.github.com.*issues/999})
+        .to_return(body: JSON.dump(
+          title: "Context Issue",
+          state: "open",
+          assignee: { login: "developer" },
+        ))
 
       generate_ruby_file(ruby_code) do |file|
         run_cli(file)
@@ -200,10 +207,10 @@ module SmartTodo
       assert_slack_message_sent(
         "Hello :wave:,",
         "The issue https://github.com/shopify/smart_todo/issues/100 is now closed",
-        "This context should be ignored",
+        "This context should be included",
+        "Context:",
+        "Context Issue",
       )
-
-      assert_not_requested(:get, %r{api.github.com.*issues/999})
     end
 
     private
