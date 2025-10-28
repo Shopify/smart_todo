@@ -87,15 +87,24 @@ module SmartTodo
           when :context
             value = visit(element.value)
 
-            if value.is_a?(CallNode) && value.method_name == :issue
-              if value.arguments.length == 3 && value.arguments.all? { |arg| arg.is_a?(String) }
-                metadata.context = value
-              else
-                metadata.errors << "Incorrect `:context` format: issue() requires exactly 3 string arguments " \
-                  "(org, repo, issue_number)"
-              end
+            unless value.is_a?(String)
+              metadata.errors << "Incorrect `:context` format: expected string value"
+              next
+            end
+
+            unless value =~ %r{^([^/]+)/([^#]+)#(\d+)$}
+              metadata.errors << "Incorrect `:context` format: expected \"org/repo#issue_number\""
+              next
+            end
+
+            org = ::Regexp.last_match(1)
+            repo = ::Regexp.last_match(2)
+            issue_number = ::Regexp.last_match(3)
+
+            if org.empty? || repo.empty?
+              metadata.errors << "Incorrect `:context` format: org and repo cannot be empty"
             else
-              metadata.errors << "Incorrect `:context` format: only issue() function is supported"
+              metadata.context = CallNode.new(:issue, [org, repo, issue_number], element.value.location)
             end
           end
         end

@@ -110,7 +110,6 @@ module RuboCop
         def validate_context(metadata)
           return [] unless metadata.context
 
-          context = metadata.context
           events = metadata.events
 
           restricted_events = events.reject { |e| ::SmartTodo::Todo.event_can_use_context?(e.method_name) }
@@ -119,15 +118,7 @@ module RuboCop
             return ["Invalid context: context attribute cannot be used with #{event_name} event"]
           end
 
-          if context.method_name != :issue
-            ["Invalid context: only issue() function is supported"]
-          elsif (error = validate_fixed_arity_args(
-            context.arguments, 3, "context issue", ["organization", "repo", "issue_number"]
-          ))
-            [error]
-          else
-            []
-          end
+          []
         end
 
         # @param args [Array]
