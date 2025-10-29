@@ -150,5 +150,41 @@ module SmartTodo
         end
       end
     end
+
+    def test_should_apply_context_returns_false_without_context
+      cli = CLI.new
+      todo = Todo.new("# TODO(on: date('2015-03-01'), to: 'john@example.com')")
+      event = Todo::CallNode.new(:date, ["2015-03-01"], nil)
+
+      refute(cli.send(:should_apply_context?, todo, event))
+    end
+
+    def test_should_apply_context_returns_true_for_issue_close_event_with_context
+      cli = CLI.new
+      todo = Todo.new(
+        "# TODO(on: issue_close('org', 'repo', '123'), to: 'john@example.com', context: \"org/repo#456\")",
+      )
+      event = Todo::CallNode.new(:issue_close, ["org", "repo", "123"], nil)
+
+      assert(cli.send(:should_apply_context?, todo, event))
+    end
+
+    def test_should_apply_context_returns_true_for_pull_request_close_event_with_context
+      cli = CLI.new
+      todo = Todo.new(
+        "# TODO(on: pull_request_close('org', 'repo', '123'), to: 'john@example.com', context: \"org/repo#456\")",
+      )
+      event = Todo::CallNode.new(:pull_request_close, ["org", "repo", "123"], nil)
+
+      assert(cli.send(:should_apply_context?, todo, event))
+    end
+
+    def test_should_apply_context_returns_true_for_regular_event_with_context
+      cli = CLI.new
+      todo = Todo.new("# TODO(on: date('2015-03-01'), to: 'john@example.com', context: \"org/repo#456\")")
+      event = Todo::CallNode.new(:date, ["2015-03-01"], nil)
+
+      assert(cli.send(:should_apply_context?, todo, event))
+    end
   end
 end

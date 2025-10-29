@@ -487,6 +487,67 @@ module SmartTodo
       RUBY
     end
 
+    def test_does_not_add_offense_when_todo_has_valid_context_with_issue
+      expect_no_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: 'john@example.com', context: "shopify/smart_todo#123")
+        def hello
+        end
+      RUBY
+    end
+
+    def test_does_not_add_offense_when_todo_has_context_with_different_events
+      expect_no_offense(<<~RUBY)
+        # TODO(on: gem_release('rails', '> 6.0'), to: 'john@example.com', context: "rails/rails#456")
+        def hello
+        end
+
+        # TODO(on: gem_bump('rails', '> 7.0'), to: 'john@example.com', context: "rails/rails#789")
+        def hello
+        end
+
+        # TODO(on: ruby_version('> 3.0'), to: 'john@example.com', context: "ruby/ruby#123")
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_context_with_wrong_number_of_arguments
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: 'john@example.com', context: "shopify/smart_todo")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid TODO format: Incorrect `:context` format: expected "org/repo#issue_number". For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_context_with_non_string_arguments
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: 'john@example.com', context: 123)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid TODO format: Incorrect `:context` format: expected string value. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_context_with_invalid_function
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: 'john@example.com', context: "shopify-smart_todo-123")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid TODO format: Incorrect `:context` format: expected "org/repo#issue_number". For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_context_does_not_require_assignee_when_event_does
+      # Even though context is present, the TODO still requires an assignee for the event
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), context: "shopify/smart_todo#123")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
+        def hello
+        end
+      RUBY
+    end
+
     private
 
     def expected_message

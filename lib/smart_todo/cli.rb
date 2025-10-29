@@ -106,10 +106,38 @@ module SmartTodo
         end
 
         @errors.concat(todo.errors)
-        dispatches << [event_message, todo] if event_met
+
+        next unless event_met
+
+        event_message = append_context_if_applicable(event_message, todo, event_met, events)
+
+        dispatches << [event_message, todo]
       end
 
       dispatches
+    end
+
+    private
+
+    # @param event_message [String] the original event message
+    # @param todo [Todo] the todo object that may contain context
+    # @param event [Event] the event that was met
+    # @param events [Events] the events instance for fetching issue context
+    # @return [String] the event message, potentially with context appended
+    def append_context_if_applicable(event_message, todo, event, events)
+      return event_message unless should_apply_context?(todo, event)
+
+      org, repo, issue_number = todo.context.arguments
+      context_message = events.issue_context(org, repo, issue_number)
+
+      context_message ? "#{event_message}\n\n#{context_message}" : event_message
+    end
+
+    # @param todo [Todo] the todo object to check for context
+    # @param event [Event] the event to check
+    # @return [Boolean] true if context should be applied, false otherwise
+    def should_apply_context?(todo, event)
+      !!todo.context
     end
 
     def process_dispatches(dispatches)

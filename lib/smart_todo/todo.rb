@@ -4,6 +4,7 @@ module SmartTodo
   class Todo
     attr_reader :filepath, :comment, :indent
     attr_reader :events, :assignees, :errors
+    attr_accessor :context
 
     def initialize(source, filepath = "-e")
       @filepath = filepath
@@ -12,6 +13,7 @@ module SmartTodo
 
       @events = []
       @assignees = []
+      @context = nil
       @errors = []
 
       parse(source[(indent + 1)..])
@@ -66,6 +68,28 @@ module SmartTodo
             end
           when :to
             metadata.assignees << visit(element.value)
+          when :context
+            value = visit(element.value)
+
+            unless value.is_a?(String)
+              metadata.errors << "Incorrect `:context` format: expected string value"
+              next
+            end
+
+            unless value =~ %r{^([^/]+)/([^#]+)#(\d+)$}
+              metadata.errors << "Incorrect `:context` format: expected \"org/repo#issue_number\""
+              next
+            end
+
+            org = ::Regexp.last_match(1)
+            repo = ::Regexp.last_match(2)
+            issue_number = ::Regexp.last_match(3)
+
+            if org.empty? || repo.empty?
+              metadata.errors << "Incorrect `:context` format: org and repo cannot be empty"
+            else
+              metadata.context = CallNode.new(:issue, [org, repo, issue_number], element.value.location)
+            end
           end
         end
       end
