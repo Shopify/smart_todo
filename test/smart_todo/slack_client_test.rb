@@ -11,7 +11,7 @@ module SmartTodo
 
     def test_lookup_user_by_email_when_user_exists
       stub_request(:get, /slack.com/)
-        .to_return(body: JSON.dump(ok: true))
+        .to_return_json(body: { ok: true })
 
       @client.lookup_user_by_email("john@example.com")
 
@@ -24,7 +24,7 @@ module SmartTodo
 
     def test_lookup_user_by_email_when_user_does_not_exist
       stub_request(:get, /slack.com/)
-        .to_return(body: JSON.dump(ok: false, error: "users_not_found"))
+        .to_return_json(body: { ok: false, error: "users_not_found" })
 
       error = assert_raises(SlackClient::Error) do
         @client.lookup_user_by_email("john@example.com")
@@ -34,7 +34,7 @@ module SmartTodo
 
     def test_post_message_is_successful
       stub_request(:post, /slack.com/)
-        .to_return(body: JSON.dump(ok: true))
+        .to_return_json(body: { ok: true })
 
       @client.post_message("#XT-123", "Hello!")
 
@@ -47,7 +47,7 @@ module SmartTodo
 
     def test_post_message_fails
       stub_request(:post, /slack.com/)
-        .to_return(body: JSON.dump(ok: false, error: "too_many_request"))
+        .to_return_json(body: { ok: false, error: "too_many_request" })
 
       error = assert_raises(SlackClient::Error) do
         @client.post_message("#XT-123", "Hello!")
@@ -67,7 +67,7 @@ module SmartTodo
 
     def test_succeeds_when_reponse_is_a_201
       stub_request(:get, /slack.com/)
-        .to_return(status: 201, body: JSON.dump(ok: true))
+        .to_return_json(body: { ok: true }, status: 201)
 
       @client.lookup_user_by_email("john@example.com")
     end
@@ -80,7 +80,7 @@ module SmartTodo
         if counter == 1
           { status: 429, headers: { "Retry-After" => "1" } }
         else
-          { status: 201, body: JSON.dump(ok: true) }
+          { status: 201, body: { ok: true }.to_json }
         end
       end
 

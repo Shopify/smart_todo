@@ -7,7 +7,7 @@ module SmartTodo
     class IssueCloseTest < Minitest::Test
       def test_when_pull_request_is_close
         stub_request(:get, /api.github.com/)
-          .to_return(body: JSON.dump(state: "closed"))
+          .to_return_json(body: { state: "closed" })
 
         expected =
           "The pull request https://github.com/rails/rails/pull/123 is now closed, your TODO is ready to be addressed."
@@ -17,7 +17,7 @@ module SmartTodo
 
       def test_when_pull_request_is_open
         stub_request(:get, /api.github.com/)
-          .to_return(body: JSON.dump(state: "open"))
+          .to_return_json(body: { state: "open" })
 
         assert_equal(false, pull_request_close("rails", "rails", "123"))
       end
@@ -38,7 +38,7 @@ module SmartTodo
 
       def test_when_token_env_is_not_present
         stub_request(:get, /api.github.com/)
-          .to_return(body: JSON.dump(state: "open"))
+          .to_return_json(body: { state: "open" })
 
         assert_equal(false, pull_request_close("rails", "rails", "123"))
 
@@ -50,7 +50,7 @@ module SmartTodo
       def test_when_token_env_is_present
         with_env(Events::GITHUB_TOKEN => "abc") do
           stub_request(:get, /api.github.com/)
-            .to_return(body: JSON.dump(state: "open"))
+            .to_return_json(body: { state: "open" })
 
           assert_equal(false, pull_request_close("rails", "rails", "123"))
 
@@ -66,7 +66,7 @@ module SmartTodo
           Events::GITHUB_TOKEN => "abc",
         ) do
           stub_request(:get, /api.github.com/)
-            .to_return(body: JSON.dump(state: "open"))
+            .to_return_json(body: { state: "open" })
 
           assert_equal(false, pull_request_close("rails", "rails", "123"))
 
@@ -83,7 +83,7 @@ module SmartTodo
           Events::GITHUB_TOKEN => "abc",
         ) do
           stub_request(:get, /api.github.com/)
-            .to_return(body: JSON.dump(state: "open"))
+            .to_return_json(body: { state: "open" })
 
           assert_equal(false, pull_request_close("Shopify", "smart-todo", "123"))
 
@@ -96,7 +96,7 @@ module SmartTodo
       def test_calls_the_right_endpoint_when_type_is_pull_request
         expected_endpoint = "https://api.github.com/repos/rails/rails/pulls/123"
         stub_request(:get, expected_endpoint)
-          .to_return(body: JSON.dump(state: "open"))
+          .to_return_json(body: { state: "open" })
 
         assert_equal(false, pull_request_close("rails", "rails", "123"))
         assert_requested(:get, expected_endpoint)
@@ -105,7 +105,7 @@ module SmartTodo
       def test_calls_the_right_endpoint_when_type_is_issue
         expected_endpoint = "https://api.github.com/repos/rails/rails/issues/123"
         stub_request(:get, expected_endpoint)
-          .to_return(body: JSON.dump(state: "open"))
+          .to_return_json(body: { state: "open" })
 
         assert_equal(false, issue_close("rails", "rails", "123"))
         assert_requested(:get, expected_endpoint)

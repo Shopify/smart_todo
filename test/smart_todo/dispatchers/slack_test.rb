@@ -11,9 +11,9 @@ module SmartTodo
 
       def test_when_user_exists
         stub_request(:get, /users.lookupByEmail/)
-          .to_return(body: JSON.dump(ok: true, user: { id: "ABC", profile: { first_name: "John" } }))
+          .to_return_json(body: { ok: true, user: { id: "ABC", profile: { first_name: "John" } } })
         stub_request(:post, /chat.postMessage/)
-          .to_return(body: JSON.dump(ok: true))
+          .to_return_json(body: { ok: true })
 
         dispatcher = Slack.new("Foo", todo_node, "file.rb", @options)
         dispatcher.dispatch
@@ -28,9 +28,9 @@ module SmartTodo
 
       def test_when_user_does_not_exist
         stub_request(:get, /users.lookupByEmail/)
-          .to_return(body: JSON.dump(ok: false, error: "users_not_found"))
+          .to_return_json(body: { ok: false, error: "users_not_found" })
         stub_request(:post, /chat.postMessage/)
-          .to_return(body: JSON.dump(ok: true))
+          .to_return_json(body: { ok: true })
 
         dispatcher = Slack.new("Foo", todo_node, "file.rb", @options)
         dispatcher.dispatch
@@ -45,9 +45,9 @@ module SmartTodo
 
       def test_when_channel_does_not_exist
         stub_request(:post, /chat.postMessage/)
-          .to_return(body: JSON.dump(ok: false, error: "channel_not_found"))
+          .to_return_json(body: { ok: false, error: "channel_not_found" })
           .then
-          .to_return(body: JSON.dump(ok: true))
+          .to_return_json(body: { ok: true })
 
         dispatcher = Slack.new("Foo", todo_node("#my_channel"), "file.rb", @options)
         dispatcher.dispatch
@@ -62,9 +62,9 @@ module SmartTodo
 
       def test_when_channel_is_archived
         stub_request(:post, /chat.postMessage/)
-          .to_return(body: JSON.dump(ok: false, error: "is_archived"))
+          .to_return_json(body: { ok: false, error: "is_archived" })
           .then
-          .to_return(body: JSON.dump(ok: true))
+          .to_return_json(body: { ok: true })
 
         dispatcher = Slack.new("Foo", todo_node("#my_channel"), "file.rb", @options)
         dispatcher.dispatch
@@ -79,7 +79,7 @@ module SmartTodo
 
       def test_raises_when_lookup_by_email_fails
         stub_request(:get, /users.lookupByEmail/)
-          .to_return(body: JSON.dump(ok: false, error: "fatal_error"))
+          .to_return_json(body: { ok: false, error: "fatal_error" })
 
         dispatcher = Slack.new("Foo", todo_node, "file.rb", @options)
 
@@ -95,7 +95,7 @@ module SmartTodo
 
       def test_when_user_is_a_slack_channel
         stub_request(:post, /chat.postMessage/)
-          .to_return(body: JSON.dump(ok: true))
+          .to_return_json(body: { ok: true })
 
         dispatcher = Slack.new("Foo", todo_node("#my_channel"), "file.rb", @options)
         dispatcher.dispatch
@@ -110,7 +110,7 @@ module SmartTodo
 
       def test_when_multiple_assignees
         stub_request(:post, /chat.postMessage/)
-          .to_return(body: JSON.dump(ok: true))
+          .to_return_json(body: { ok: true })
 
         dispatcher = Slack.new("Foo", todo_node("#my_channel1", "#my_channel2"), "file.rb", @options)
         dispatcher.dispatch
