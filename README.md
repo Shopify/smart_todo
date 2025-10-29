@@ -40,28 +40,6 @@ When the TODO's event is met (i.e. a certain date is reached), the TODO's assign
   end
 ```
 
-You can also add context to your TODOs by linking them to GitHub issues. The `context` attribute
-works with all events:
-
-```ruby
-  # TODO(on: date('2025-01-01'), to: 'team@example.com', context: "shopify/smart_todo#108")
-  #   Implement the caching strategy discussed in the issue
-  def process_order
-  end
-
-  # TODO(on: gem_release('rails', '> 7.2'), to: 'dev@example.com', context: "rails/rails#456")
-  #   Upgrade to new Rails version as discussed in the issue
-  def legacy_method
-  end
-
-  # TODO(on: issue_close('shopify', 'smart_todo', '123'), to: 'team@example.com', context: "shopify/other-repo#456")
-  #   Update once the referenced issue is closed, see related context for details
-  def feature_flag
-  end
-```
-
-When the TODO is triggered, the linked issue's title, state, and assignee will be included in the notification.
-
 Documentation
 ----------------
 Please check out the GitHub [wiki](https://github.com/Shopify/smart_todo/wiki) for documentation and example on how to setup SmartTodo in your project.
