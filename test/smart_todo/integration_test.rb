@@ -31,7 +31,7 @@ module SmartTodo
       EOM
 
       stub_request(:get, /rubygems.org/)
-        .to_return(body: JSON.dump([{ number: "5.1.1" }]))
+        .to_return_json(body: [{ number: "5.1.1" }])
 
       generate_ruby_file(ruby_code) do |file|
         run_cli(file)
@@ -52,7 +52,7 @@ module SmartTodo
       EOM
 
       stub_request(:get, /api.github.com/)
-        .to_return(body: JSON.dump(state: "closed"))
+        .to_return_json(body: { state: "closed" })
 
       generate_ruby_file(ruby_code) do |file|
         run_cli(file)
@@ -73,7 +73,7 @@ module SmartTodo
       EOM
 
       stub_request(:get, /api.github.com/)
-        .to_return(body: JSON.dump(state: "closed"))
+        .to_return_json(body: { state: "closed" })
 
       generate_ruby_file(ruby_code) do |file|
         run_cli(file)
@@ -113,12 +113,12 @@ module SmartTodo
       EOM
 
       stub_request(:get, /api.github.com/)
-        .to_return(body: JSON.dump(
+        .to_return_json(body: {
           state: "open",
           title: "Add caching support",
           number: 123,
           assignee: { login: "developer" },
-        ))
+        })
 
       generate_ruby_file(ruby_code) do |file|
         run_cli(file)
@@ -142,15 +142,15 @@ module SmartTodo
       EOM
 
       stub_request(:get, /rubygems.org/)
-        .to_return(body: JSON.dump([{ number: "5.1.1" }]))
+        .to_return_json(body: [{ number: "5.1.1" }])
 
       stub_request(:get, /api.github.com/)
-        .to_return(body: JSON.dump(
+        .to_return_json(body: {
           state: "closed",
           title: "Rails upgrade needed",
           number: 456,
           assignee: nil,
-        ))
+        })
 
       generate_ruby_file(ruby_code) do |file|
         run_cli(file)
@@ -191,14 +191,14 @@ module SmartTodo
       EOM
 
       stub_request(:get, %r{api.github.com.*issues/100})
-        .to_return(body: JSON.dump(state: "closed"))
+        .to_return_json(body: { state: "closed" })
 
       stub_request(:get, %r{api.github.com.*issues/999})
-        .to_return(body: JSON.dump(
+        .to_return_json(body: {
           title: "Context Issue",
           state: "open",
           assignee: { login: "developer" },
-        ))
+        })
 
       generate_ruby_file(ruby_code) do |file|
         run_cli(file)
@@ -227,10 +227,10 @@ module SmartTodo
 
     def stub_slack_request
       stub_request(:get, /users.lookupByEmail/)
-        .to_return(body: JSON.dump(ok: true, user: { id: "ABC", profile: { first_name: "John" } }))
+        .to_return_json(body: { ok: true, user: { id: "ABC", profile: { first_name: "John" } } })
 
       stub_request(:post, /chat.postMessage/)
-        .to_return(body: JSON.dump(ok: true))
+        .to_return_json(body: { ok: true })
     end
 
     def run_cli(file)

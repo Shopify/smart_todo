@@ -75,6 +75,8 @@ module SmartTodo
           false
         end
       end
+    rescue Net::HTTPError, JSON::ParserError
+      "Error retrieving gem information for *#{gem_name}*."
     end
 
     # Check if +gem_name+ was bumped to the +requirements+ expected
@@ -130,6 +132,8 @@ module SmartTodo
       else
         false
       end
+    rescue Net::HTTPError, JSON::ParserError
+      "Error retrieving issue information for #{organization}/#{repo}##{issue_number}."
     end
 
     # Check if the pull request +pr_number+ is closed
@@ -155,6 +159,8 @@ module SmartTodo
       else
         false
       end
+    rescue Net::HTTPError, JSON::ParserError
+      "Error retrieving pull request information for #{organization}/#{repo}##{pr_number}."
     end
 
     # Retrieve context information for an issue
