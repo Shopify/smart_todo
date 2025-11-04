@@ -9,12 +9,24 @@ module SmartTodo
         @options = { fallback_channel: "#general", slack_token: "123", repo: "example" }
       end
 
-      def test_dispatch
+      def test_dispatch_with_github_link
+        dispatcher = Output.new("Foo", todo_node, "file.rb", @options)
+
+        output = capture_io { dispatcher.dispatch }[0]
+
+        # Verify it includes a GitHub link (we're in the smart_todo repo)
+        assert_match(%r{<https://github.com/Shopify/smart_todo/blob/[^/]+/file\.rb#L1\|file\.rb:1>}, output)
+        assert_match(/Foo/, output)
+        assert_match(/Hello :wave:,/, output)
+      end
+
+      def test_dispatch_without_github_link
+        @options[:base_path] = "/tmp/non-git"
         dispatcher = Output.new("Foo", todo_node, "file.rb", @options)
         expected_text = <<~HEREDOC
           Hello :wave:,
 
-          You have an assigned TODO in the `file.rb` file in repository `example`.
+          You have an assigned TODO in the `file.rb` file on line 1 in repository `example`.
           Foo
 
           Here is the associated comment on your TODO:
