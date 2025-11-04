@@ -11,9 +11,9 @@ module SmartTodo
 
         info = GitUtils.github_info(dir)
 
-        assert_equal "Shopify", info[:org]
-        assert_equal "smart_todo", info[:repo]
-        assert_equal "https://github.com/Shopify/smart_todo", info[:url]
+        assert_equal("Shopify", info[:org])
+        assert_equal("smart_todo", info[:repo])
+        assert_equal("https://github.com/Shopify/smart_todo", info[:url])
       end
     end
 
@@ -23,9 +23,9 @@ module SmartTodo
 
         info = GitUtils.github_info(dir)
 
-        assert_equal "Shopify", info[:org]
-        assert_equal "smart_todo", info[:repo]
-        assert_equal "https://github.com/Shopify/smart_todo", info[:url]
+        assert_equal("Shopify", info[:org])
+        assert_equal("smart_todo", info[:repo])
+        assert_equal("https://github.com/Shopify/smart_todo", info[:url])
       end
     end
 
@@ -35,9 +35,9 @@ module SmartTodo
 
         info = GitUtils.github_info(dir)
 
-        assert_equal "Shopify", info[:org]
-        assert_equal "smart_todo", info[:repo]
-        assert_equal "https://github.com/Shopify/smart_todo", info[:url]
+        assert_equal("Shopify", info[:org])
+        assert_equal("smart_todo", info[:repo])
+        assert_equal("https://github.com/Shopify/smart_todo", info[:url])
       end
     end
 
@@ -47,7 +47,7 @@ module SmartTodo
 
         info = GitUtils.github_info(dir)
 
-        assert_nil info
+        assert_nil(info)
       end
     end
 
@@ -55,7 +55,7 @@ module SmartTodo
       Dir.mktmpdir do |dir|
         info = GitUtils.github_info(dir)
 
-        assert_nil info
+        assert_nil(info)
       end
     end
 
@@ -66,7 +66,7 @@ module SmartTodo
 
         link = GitUtils.generate_github_link("lib/todo.rb", 42, dir)
 
-        assert_equal "https://github.com/Shopify/smart_todo/blob/main/lib/todo.rb#L42", link
+        assert_equal("https://github.com/Shopify/smart_todo/blob/main/lib/todo.rb#L42", link)
       end
     end
 
@@ -78,7 +78,7 @@ module SmartTodo
         absolute_path = File.join(dir, "lib/todo.rb")
         link = GitUtils.generate_github_link(absolute_path, 42, dir)
 
-        assert_equal "https://github.com/Shopify/smart_todo/blob/main/lib/todo.rb#L42", link
+        assert_equal("https://github.com/Shopify/smart_todo/blob/main/lib/todo.rb#L42", link)
       end
     end
 
@@ -89,7 +89,7 @@ module SmartTodo
 
         link = GitUtils.generate_github_link("lib/todo.rb", 42, dir)
 
-        assert_equal "https://github.com/Shopify/smart_todo/blob/feature-branch/lib/todo.rb#L42", link
+        assert_equal("https://github.com/Shopify/smart_todo/blob/feature-branch/lib/todo.rb#L42", link)
       end
     end
 
@@ -97,7 +97,7 @@ module SmartTodo
       Dir.mktmpdir do |dir|
         link = GitUtils.generate_github_link("lib/todo.rb", 42, dir)
 
-        assert_nil link
+        assert_nil(link)
       end
     end
 
@@ -108,7 +108,7 @@ module SmartTodo
 
         link = GitUtils.generate_github_link("lib/todo.rb", 42, dir)
 
-        assert_nil link
+        assert_nil(link)
       end
     end
 

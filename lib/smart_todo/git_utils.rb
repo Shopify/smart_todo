@@ -9,11 +9,11 @@ module SmartTodo
       # Returns nil if not a git repository or cannot parse GitHub URL
       def github_info(base_path = Dir.pwd)
         git_config = File.join(base_path, ".git", "config")
-        return nil unless File.exist?(git_config)
+        return unless File.exist?(git_config)
 
         config_content = File.read(git_config)
         remote_url = parse_remote_url(config_content)
-        return nil unless remote_url
+        return unless remote_url
 
         parse_github_url(remote_url)
       end
@@ -22,7 +22,7 @@ module SmartTodo
       # e.g., https://github.com/Shopify/smart_todo/blob/main/lib/todo.rb#L42
       def generate_github_link(filepath, line_number, base_path = Dir.pwd)
         github_info = github_info(base_path)
-        return nil unless github_info
+        return unless github_info
 
         # Convert absolute path to relative path from repo root
         relative_path = if filepath.start_with?(base_path)
@@ -31,7 +31,7 @@ module SmartTodo
           filepath
         end
 
-        # Get the default branch (main or master)
+        # Get the default branch (typically main)
         branch = default_branch(base_path) || "main"
 
         "#{github_info[:url]}/blob/#{branch}/#{relative_path}#L#{line_number}"
@@ -71,10 +71,10 @@ module SmartTodo
         end
       end
 
-      # Gets the default branch name (usually main or master)
+      # Gets the default branch name from HEAD reference
       def default_branch(base_path)
         head_file = File.join(base_path, ".git", "HEAD")
-        return nil unless File.exist?(head_file)
+        return unless File.exist?(head_file)
 
         head_content = File.read(head_file).strip
         if head_content =~ %r{ref: refs/heads/(.+)}
