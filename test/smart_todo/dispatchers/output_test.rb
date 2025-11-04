@@ -21,22 +21,25 @@ module SmartTodo
       end
 
       def test_dispatch_without_github_link
-        @options[:base_path] = "/tmp/non-git"
-        dispatcher = Output.new("Foo", todo_node, "file.rb", @options)
-        expected_text = <<~HEREDOC
-          Hello :wave:,
+        # Use a file path in a temporary directory without a git repo
+        Dir.mktmpdir do |tmpdir|
+          filepath = File.join(tmpdir, "file.rb")
+          dispatcher = Output.new("Foo", todo_node, filepath, @options)
+          expected_text = <<~HEREDOC
+            Hello :wave:,
 
-          You have an assigned TODO in the `file.rb` file on line 1 in repository `example`.
-          Foo
+            You have an assigned TODO in the `#{filepath}` file on line 1 in repository `example`.
+            Foo
 
-          Here is the associated comment on your TODO:
+            Here is the associated comment on your TODO:
 
-          ```
+            ```
 
-          ```
-        HEREDOC
+            ```
+          HEREDOC
 
-        assert_output(expected_text) { dispatcher.dispatch }
+          assert_output(expected_text) { dispatcher.dispatch }
+        end
       end
 
       private

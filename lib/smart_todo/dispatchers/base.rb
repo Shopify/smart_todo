@@ -85,17 +85,23 @@ module SmartTodo
       #
       # @return [String]
       def generate_file_reference
-        base_path = @options[:base_path] || Dir.pwd
+        # Find the git repository root from the file's path, not from Dir.pwd
+        # This ensures we detect the correct repo even when smart_todo is run
+        # from a different directory than the repo root
+        git_root = GitUtils.find_git_root(@file)
 
-        # Try to generate a GitHub link if we have a line number
-        if @todo_node.line_number
-          github_link = GitUtils.generate_github_link(@file, @todo_node.line_number, base_path)
+        # Try to generate a GitHub link if we have a line number and found a git repo
+        if @todo_node.line_number && git_root
+          github_link = GitUtils.generate_github_link(@file, @todo_node.line_number, git_root)
 
           if github_link
             " at <#{github_link}|#{@file}:#{@todo_node.line_number}>"
           else
             " in the `#{@file}` file on line #{@todo_node.line_number}"
           end
+        elsif @todo_node.line_number
+          # Have line number but no git repo
+          " in the `#{@file}` file on line #{@todo_node.line_number}"
         else
           # Fallback to just the file name if no line number
           " in the `#{@file}` file"

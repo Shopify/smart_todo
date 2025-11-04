@@ -112,6 +112,79 @@ module SmartTodo
       end
     end
 
+    def test_find_git_root_from_repo_root
+      Dir.mktmpdir do |dir|
+        setup_git_repo(dir, "https://github.com/Shopify/smart_todo.git")
+
+        git_root = GitUtils.find_git_root(dir)
+
+        assert_equal(dir, git_root)
+      end
+    end
+
+    def test_find_git_root_from_subdirectory
+      Dir.mktmpdir do |dir|
+        setup_git_repo(dir, "https://github.com/Shopify/smart_todo.git")
+        subdir = File.join(dir, "lib", "smart_todo")
+        FileUtils.mkdir_p(subdir)
+
+        git_root = GitUtils.find_git_root(subdir)
+
+        assert_equal(dir, git_root)
+      end
+    end
+
+    def test_find_git_root_from_file_path
+      Dir.mktmpdir do |dir|
+        setup_git_repo(dir, "https://github.com/Shopify/smart_todo.git")
+        subdir = File.join(dir, "lib")
+        FileUtils.mkdir_p(subdir)
+        file_path = File.join(subdir, "todo.rb")
+        File.write(file_path, "# test file")
+
+        git_root = GitUtils.find_git_root(file_path)
+
+        assert_equal(dir, git_root)
+      end
+    end
+
+    def test_find_git_root_without_git_repo
+      Dir.mktmpdir do |dir|
+        git_root = GitUtils.find_git_root(dir)
+
+        assert_nil(git_root)
+      end
+    end
+
+    def test_find_git_root_deeply_nested
+      Dir.mktmpdir do |dir|
+        setup_git_repo(dir, "https://github.com/Shopify/smart_todo.git")
+        deep_dir = File.join(dir, "a", "b", "c", "d", "e")
+        FileUtils.mkdir_p(deep_dir)
+
+        git_root = GitUtils.find_git_root(deep_dir)
+
+        assert_equal(dir, git_root)
+      end
+    end
+
+    def test_find_git_root_caches_results
+      Dir.mktmpdir do |dir|
+        setup_git_repo(dir, "https://github.com/Shopify/smart_todo.git")
+        subdir = File.join(dir, "lib")
+        FileUtils.mkdir_p(subdir)
+
+        # First call
+        git_root1 = GitUtils.find_git_root(subdir)
+        # Second call should hit cache
+        git_root2 = GitUtils.find_git_root(subdir)
+
+        assert_equal(dir, git_root1)
+        assert_equal(dir, git_root2)
+        assert_same(git_root1, git_root2) # Same object reference indicates caching
+      end
+    end
+
     private
 
     def setup_git_repo(dir, remote_url)
