@@ -59,7 +59,8 @@ module SmartTodo
 
         if source.match?(TAG_PATTERN)
           todos << current_todo if current_todo
-          current_todo = Todo.new(source, filepath)
+          line_number = comment.location.start_line
+          current_todo = Todo.new(source, filepath, line_number)
         elsif current_todo && (indent = source[/^#(\s*)/, 1].length) && (indent - current_todo.indent == 2)
           current_todo << "#{source[(indent + 1)..]}\n"
         else
