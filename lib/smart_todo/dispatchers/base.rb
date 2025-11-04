@@ -65,10 +65,12 @@ module SmartTodo
           existing_user
         end
 
+        file_reference = generate_file_reference
+
         <<~EOM
           #{header}
 
-          You have an assigned TODO in the `#{@file}` file#{repo}.
+          You have an assigned TODO#{file_reference}#{repo}.
           #{@event_message}
 
           Here is the associated comment on your TODO:
@@ -77,6 +79,27 @@ module SmartTodo
           #{@todo_node.comment.strip}
           ```
         EOM
+      end
+
+      # Generates a file reference with link (if in a GitHub repo) or readable line reference
+      #
+      # @return [String]
+      def generate_file_reference
+        base_path = @options[:base_path] || Dir.pwd
+
+        # Try to generate a GitHub link if we have a line number
+        if @todo_node.line_number
+          github_link = GitUtils.generate_github_link(@file, @todo_node.line_number, base_path)
+
+          if github_link
+            " at <#{github_link}|#{@file}:#{@todo_node.line_number}>"
+          else
+            " in the `#{@file}` file on line #{@todo_node.line_number}"
+          end
+        else
+          # Fallback to just the file name if no line number
+          " in the `#{@file}` file"
+        end
       end
 
       # Message in case a TODO's assignee doesn't exist in the Slack organization
