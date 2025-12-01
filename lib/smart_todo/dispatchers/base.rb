@@ -57,18 +57,21 @@ module SmartTodo
       #
       # @param user [Hash] contain information about a user
       # @param assignee [String] original string handle the slack message should be sent
+      # @param owner [String, nil] optional Slack user ID of the TODO owner (from git blame)
       # @return [String]
-      def slack_message(user, assignee)
+      def slack_message(user, assignee, owner: nil)
         header = if user.key?("fallback")
           unexisting_user(assignee)
         else
           existing_user
         end
 
+        owner_line = owner ? "\nOwner: <@#{owner}>\n" : ""
+
         <<~EOM
           #{header}
 
-          You have an assigned TODO in the `#{@file}` file#{repo}.
+          You have an assigned TODO in the `#{@file}` file#{repo}.#{owner_line}
           #{@event_message}
 
           Here is the associated comment on your TODO:

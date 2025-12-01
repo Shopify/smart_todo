@@ -175,7 +175,67 @@ module SmartTodo
         assert_equal("Missing :fallback_channel", error.message)
       end
 
+      def test_includes_owner_when_git_blame_returns_email
+        stub_request(:get, /users.lookupByEmail/)
+          .to_return_json(body: { ok: true, user: { id: "ABC", profile: { first_name: "John" } } })
+        stub_request(:post, /chat.postMessage/)
+          .to_return_json(body: { ok: true })
+
+        # Create a todo node with a file that exists in the repo
+        todo = todo_node_with_real_file
+
+        dispatcher = Slack.new("Foo", todo, todo.filepath, @options)
+        dispatcher.dispatch
+
+        assert_requested(:post, /chat.postMessage/) do |request|
+          request_body = JSON.parse(request.body)
+          assert_match(/Owner: <@ABC>/, request_body["text"])
+        end
+      end
+
+      def test_excludes_owner_when_git_blame_fails
+        stub_request(:get, /users.lookupByEmail/)
+          .to_return_json(body: { ok: true, user: { id: "ABC", profile: { first_name: "John" } } })
+        stub_request(:post, /chat.postMessage/)
+          .to_return_json(body: { ok: true })
+
+        dispatcher = Slack.new("Foo", todo_node, "file.rb", @options)
+        dispatcher.dispatch
+
+        assert_requested(:post, /chat.postMessage/) do |request|
+          request_body = JSON.parse(request.body)
+          refute_match(/Owner:/, request_body["text"])
+        end
+      end
+
+      def test_excludes_owner_when_slack_user_not_found_by_email
+        # First request is for assignee lookup
+        stub_request(:get, /users.lookupByEmail/)
+          .to_return_json(body: { ok: true, user: { id: "ABC", profile: { first_name: "John" } } })
+          .then
+          .to_return_json(body: { ok: false, error: "users_not_found" })
+        stub_request(:post, /chat.postMessage/)
+          .to_return_json(body: { ok: true })
+
+        dispatcher = Slack.new("Foo", todo_node, "file.rb", @options)
+        dispatcher.dispatch
+
+        assert_requested(:post, /chat.postMessage/) do |request|
+          request_body = JSON.parse(request.body)
+          refute_match(/Owner:/, request_body["text"])
+        end
+      end
+
       private
+
+      def todo_node_with_real_file
+        # Use an actual file from the repo so git blame works
+        filepath = File.expand_path("../../../lib/smart_todo/version.rb", __dir__)
+        todo = todo_node
+        todo.instance_variable_set(:@filepath, filepath)
+        todo.instance_variable_set(:@start_line, 1)
+        todo
+      end
 
       def todo_node(*assignees)
         tos = assignees.map { |assignee| "to: '#{assignee}'" }

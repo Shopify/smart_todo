@@ -2,12 +2,13 @@
 
 module SmartTodo
   class Todo
-    attr_reader :filepath, :comment, :indent
+    attr_reader :filepath, :comment, :indent, :start_line
     attr_reader :events, :assignees, :errors
     attr_accessor :context
 
-    def initialize(source, filepath = "-e")
+    def initialize(source, filepath = "-e", start_line: nil)
       @filepath = filepath
+      @start_line = start_line
       @comment = +""
       @indent = source[/^#(\s+)/, 1].length
 
