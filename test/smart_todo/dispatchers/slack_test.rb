@@ -175,6 +175,54 @@ module SmartTodo
         assert_equal("Missing :fallback_channel", error.message)
       end
 
+      def test_includes_owner_when_specified
+        stub_request(:get, /users.lookupByEmail/)
+          .to_return_json(body: { ok: true, user: { id: "OWNER123", profile: { first_name: "Jane" } } })
+        stub_request(:post, /chat.postMessage/)
+          .to_return_json(body: { ok: true })
+
+        dispatcher = Slack.new("Foo", todo_node_with_owner, "file.rb", @options)
+        dispatcher.dispatch
+
+        assert_requested(:post, /chat.postMessage/) do |request|
+          request_body = JSON.parse(request.body)
+          assert_match(/Owner: <@OWNER123>/, request_body["text"])
+        end
+      end
+
+      def test_excludes_owner_when_not_specified
+        stub_request(:get, /users.lookupByEmail/)
+          .to_return_json(body: { ok: true, user: { id: "ABC", profile: { first_name: "John" } } })
+        stub_request(:post, /chat.postMessage/)
+          .to_return_json(body: { ok: true })
+
+        dispatcher = Slack.new("Foo", todo_node, "file.rb", @options)
+        dispatcher.dispatch
+
+        assert_requested(:post, /chat.postMessage/) do |request|
+          request_body = JSON.parse(request.body)
+          refute_match(/Owner:/, request_body["text"])
+        end
+      end
+
+      def test_excludes_owner_when_slack_lookup_fails
+        # First call for owner lookup fails, second for assignee succeeds
+        stub_request(:get, /users.lookupByEmail/)
+          .to_return_json(body: { ok: false, error: "users_not_found" })
+          .then
+          .to_return_json(body: { ok: true, user: { id: "ABC", profile: { first_name: "John" } } })
+        stub_request(:post, /chat.postMessage/)
+          .to_return_json(body: { ok: true })
+
+        dispatcher = Slack.new("Foo", todo_node_with_owner, "file.rb", @options)
+        dispatcher.dispatch
+
+        assert_requested(:post, /chat.postMessage/) do |request|
+          request_body = JSON.parse(request.body)
+          refute_match(/Owner:/, request_body["text"])
+        end
+      end
+
       private
 
       def todo_node(*assignees)
@@ -183,6 +231,16 @@ module SmartTodo
 
         ruby_code = <<~EOM
           # TODO(on: date('2011-03-02'), #{tos.join(", ")})
+          def hello
+          end
+        EOM
+
+        CommentParser.parse(ruby_code)[0]
+      end
+
+      def todo_node_with_owner
+        ruby_code = <<~EOM
+          # TODO(on: date('2011-03-02'), to: '#my-channel', owner: 'jane@example.com')
           def hello
           end
         EOM

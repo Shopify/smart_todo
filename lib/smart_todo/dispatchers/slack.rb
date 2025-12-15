@@ -21,8 +21,9 @@ module SmartTodo
       #
       # @return [Array] Slack response for each assignee a message was sent to
       def dispatch
+        owner_slack_id = lookup_owner
         @assignees.each do |assignee|
-          dispatch_one(assignee)
+          dispatch_one(assignee, owner_slack_id)
         end
       end
 
@@ -31,15 +32,16 @@ module SmartTodo
       # @raise [SlackClient::Error] in case the Slack API returns an error
       #   other than `users_not_found`
       #
-      # @param [String] the assignee handle string
+      # @param assignee [String] the assignee handle string
+      # @param owner_slack_id [String, nil] the Slack user ID of the TODO owner
       # @return [Hash] the Slack response
-      def dispatch_one(assignee)
+      def dispatch_one(assignee, owner_slack_id = nil)
         user = slack_user_or_channel(assignee)
 
         return unless user
 
         begin
-          client.post_message(user.dig("user", "id"), slack_message(user, assignee))
+          client.post_message(user.dig("user", "id"), slack_message(user, assignee, owner_slack_id: owner_slack_id))
         rescue SlackClient::Error => error
           user = handle_slack_error(error, "Error dispatching message")
           retry
@@ -50,6 +52,18 @@ module SmartTodo
       end
 
       private
+
+      # Look up the Slack user ID for the TODO owner.
+      #
+      # @return [String, nil] the Slack user ID, or nil if no owner specified
+      def lookup_owner
+        return unless @todo_node.owner
+
+        response = client.lookup_user_by_email(@todo_node.owner)
+        response.dig("user", "id")
+      rescue SlackClient::Error, Net::HTTPError
+        nil
+      end
 
       # Returns a formatted hash containing either the user id of a slack user or
       # the channel the message should be sent to.

@@ -135,7 +135,7 @@ module SmartTodo
 
     def test_does_not_add_offense_when_todo_assignee_is_a_list_of_strings
       expect_no_offense(<<~RUBY)
-        # TODO(on: date('2019-08-04'), to: '#foo', to: '#bar')
+        # TODO(on: date('2019-08-04'), to: '#foo', to: '#bar', owner: 'john@example.com')
         def hello
         end
       RUBY
@@ -543,6 +543,67 @@ module SmartTodo
       expect_offense(<<~RUBY)
         # TODO(on: date('2019-08-04'), context: "shopify/smart_todo#123")
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message}
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_is_assigned_to_channel_without_owner
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: '#my-channel')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Missing `owner:` option. When assigning to a channel, you must specify an owner. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_does_not_add_offense_when_todo_is_assigned_to_channel_with_owner
+      expect_no_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: '#my-channel', owner: 'john@example.com')
+        def hello
+        end
+      RUBY
+    end
+
+    def test_does_not_add_offense_when_todo_is_assigned_to_email_without_owner
+      expect_no_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: 'john@example.com')
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_todo_has_mixed_assignees_without_owner
+      # If any assignee is a channel, owner is required
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: '#my-channel', to: 'john@example.com')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Missing `owner:` option. When assigning to a channel, you must specify an owner. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_does_not_add_offense_when_todo_has_mixed_assignees_with_owner
+      expect_no_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: '#my-channel', to: 'john@example.com', owner: 'jane@example.com')
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_owner_is_not_an_email
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: '#my-channel', owner: 'john')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid TODO format: Incorrect `:owner` format: expected email address. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
+        def hello
+        end
+      RUBY
+    end
+
+    def test_add_offense_when_owner_is_not_a_string
+      expect_offense(<<~RUBY)
+        # TODO(on: date('2019-08-04'), to: '#my-channel', owner: 123)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SmartTodo/SmartTodoCop: Invalid TODO format: Incorrect `:owner` format: expected email address. For more info please look at https://github.com/Shopify/smart_todo/wiki/Syntax
         def hello
         end
       RUBY

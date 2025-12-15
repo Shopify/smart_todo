@@ -113,6 +113,45 @@ module SmartTodo
         assert_empty(result.events)
         assert_empty(result.assignees)
       end
+
+      def test_parse_todo_metadata_with_owner
+        ruby_code = <<~RUBY
+          # TODO(on: date('2019-08-04'), to: '#my-channel', owner: 'jane@example.com')
+        RUBY
+
+        result = Todo.new(ruby_code)
+        assert_equal("jane@example.com", result.owner)
+        assert_empty(result.errors)
+      end
+
+      def test_parse_todo_metadata_without_owner
+        ruby_code = <<~RUBY
+          # TODO(on: date('2019-08-04'), to: 'john@example.com')
+        RUBY
+
+        result = Todo.new(ruby_code)
+        assert_nil(result.owner)
+      end
+
+      def test_parse_todo_metadata_with_invalid_owner_not_email
+        ruby_code = <<~RUBY
+          # TODO(on: date('2019-08-04'), to: '#my-channel', owner: 'john')
+        RUBY
+
+        result = Todo.new(ruby_code)
+        assert_nil(result.owner)
+        assert_equal(["Incorrect `:owner` format: expected email address"], result.errors)
+      end
+
+      def test_parse_todo_metadata_with_invalid_owner_not_string
+        ruby_code = <<~RUBY
+          # TODO(on: date('2019-08-04'), to: '#my-channel', owner: 123)
+        RUBY
+
+        result = Todo.new(ruby_code)
+        assert_nil(result.owner)
+        assert_equal(["Incorrect `:owner` format: expected email address"], result.errors)
+      end
     end
   end
 end

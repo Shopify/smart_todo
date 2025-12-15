@@ -38,6 +38,11 @@ module RuboCop
               add_offense(comment, message: "Invalid event assignee. This method only accepts strings. #{HELP}")
             elsif (invalid_events = validate_events(metadata.events)).any?
               add_offense(comment, message: "#{invalid_events.join(". ")}. #{HELP}")
+            elsif missing_owner?(metadata)
+              add_offense(
+                comment,
+                message: "Missing `owner:` option. When assigning to a channel, you must specify an owner. #{HELP}",
+              )
             end
           end
         end
@@ -62,6 +67,19 @@ module RuboCop
         # @return [Array]
         def invalid_assignees(assignees)
           assignees.reject { |assignee| assignee.is_a?(String) }
+        end
+
+        # Checks if the TODO is missing an owner when assigned to a channel.
+        # Owner is required when any assignee is a channel (starts with #).
+        #
+        # @param metadata [SmartTodo::Todo]
+        # @return [Boolean]
+        def missing_owner?(metadata)
+          assignees = metadata.assignees.select { |a| a.is_a?(String) }
+          return false if assignees.empty?
+
+          has_channel = assignees.any? { |assignee| assignee.start_with?("#") }
+          has_channel && metadata.owner.nil?
         end
 
         # @param events [Array<SmartTodo::Todo::CallNode>]

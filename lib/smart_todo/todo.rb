@@ -4,7 +4,7 @@ module SmartTodo
   class Todo
     attr_reader :filepath, :comment, :indent
     attr_reader :events, :assignees, :errors
-    attr_accessor :context
+    attr_accessor :context, :owner
 
     def initialize(source, filepath = "-e")
       @filepath = filepath
@@ -14,6 +14,7 @@ module SmartTodo
       @events = []
       @assignees = []
       @context = nil
+      @owner = nil
       @errors = []
 
       parse(source[(indent + 1)..])
@@ -68,6 +69,14 @@ module SmartTodo
             end
           when :to
             metadata.assignees << visit(element.value)
+          when :owner
+            value = visit(element.value)
+
+            if value.is_a?(String) && value.include?("@")
+              metadata.owner = value
+            else
+              metadata.errors << "Incorrect `:owner` format: expected email address"
+            end
           when :context
             value = visit(element.value)
 
