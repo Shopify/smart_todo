@@ -23,7 +23,7 @@ GEM
     parser (3.3.7.3)
       ast (~> 2.4.1)
       racc
-    prism (1.6.0)
+    prism (1.7.0)
     public_suffix (6.0.2)
     racc (1.8.1)
     rainbow (3.1.1)
