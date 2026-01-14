@@ -55,6 +55,7 @@ module RuboCop
             if assignees.nil? || assignees.empty?
               raise "RequiredAssignees must be set for SmartTodo/AssignmentRules"
             end
+
             assignees
           end
         end

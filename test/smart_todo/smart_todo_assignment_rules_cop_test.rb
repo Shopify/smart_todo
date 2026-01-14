@@ -20,7 +20,7 @@ module SmartTodo
     def test_add_offense_when_smart_todo_missing_one_required_assignee
       expect_offense(<<~RUBY)
         # TODO(on: date('2024-03-29'), to: 'john@example.com', to: '#project-alerts')
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message_single('@team-lead')}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{expected_message_single("@team-lead")}
         #   Do something
         def hello
         end
