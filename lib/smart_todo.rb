@@ -10,6 +10,7 @@ module SmartTodo
   autoload :Todo,                     "smart_todo/todo"
   autoload :CommentParser,            "smart_todo/comment_parser"
   autoload :HttpClientBuilder,        "smart_todo/http_client_builder"
+  autoload :DeepLink,                 "smart_todo/deep_link"
 
   module Dispatchers
     autoload :Base,                   "smart_todo/dispatchers/base"
