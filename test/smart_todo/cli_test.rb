@@ -153,7 +153,7 @@ module SmartTodo
 
     def test_should_apply_context_returns_false_without_context
       cli = CLI.new
-      todo = Todo.new("# TODO(on: date('2015-03-01'), to: 'john@example.com')")
+      todo = Todo.new("# TODO(on: date('2015-03-01'), to: 'john@example.com')", line_number: 1)
       event = Todo::CallNode.new(:date, ["2015-03-01"], nil)
 
       refute(cli.send(:should_apply_context?, todo, event))
@@ -163,6 +163,7 @@ module SmartTodo
       cli = CLI.new
       todo = Todo.new(
         "# TODO(on: issue_close('org', 'repo', '123'), to: 'john@example.com', context: \"org/repo#456\")",
+        line_number: 1,
       )
       event = Todo::CallNode.new(:issue_close, ["org", "repo", "123"], nil)
 
@@ -173,6 +174,7 @@ module SmartTodo
       cli = CLI.new
       todo = Todo.new(
         "# TODO(on: pull_request_close('org', 'repo', '123'), to: 'john@example.com', context: \"org/repo#456\")",
+        line_number: 1,
       )
       event = Todo::CallNode.new(:pull_request_close, ["org", "repo", "123"], nil)
 
@@ -181,7 +183,10 @@ module SmartTodo
 
     def test_should_apply_context_returns_true_for_regular_event_with_context
       cli = CLI.new
-      todo = Todo.new("# TODO(on: date('2015-03-01'), to: 'john@example.com', context: \"org/repo#456\")")
+      todo = Todo.new(
+        "# TODO(on: date('2015-03-01'), to: 'john@example.com', context: \"org/repo#456\")",
+        line_number: 1,
+      )
       event = Todo::CallNode.new(:date, ["2015-03-01"], nil)
 
       assert(cli.send(:should_apply_context?, todo, event))

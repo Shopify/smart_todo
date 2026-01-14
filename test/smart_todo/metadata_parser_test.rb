@@ -10,7 +10,7 @@ module SmartTodo
           # TODO(on: date('2019-08-04'), to: 'john@example.com')
         RUBY
 
-        result = Todo.new(ruby_code)
+        result = Todo.new(ruby_code, line_number: 1)
         assert_equal(1, result.events.size)
         assert_equal(:date, result.events[0].method_name)
         assert_equal(["john@example.com"], result.assignees)
@@ -21,7 +21,7 @@ module SmartTodo
           # TODO(on: date('2019-08-04'), on: gem_release('v1.2'), to: 'john@example.com')
         RUBY
 
-        result = Todo.new(ruby_code)
+        result = Todo.new(ruby_code, line_number: 1)
         assert_equal(2, result.events.size)
         assert_equal(:date, result.events[0].method_name)
         assert_equal(:gem_release, result.events[1].method_name)
@@ -33,7 +33,7 @@ module SmartTodo
           # TODO(on: date('2019-08-04'))
         RUBY
 
-        result = Todo.new(ruby_code)
+        result = Todo.new(ruby_code, line_number: 1)
         assert_equal(:date, result.events[0].method_name)
         assert_empty(result.assignees)
       end
@@ -43,7 +43,7 @@ module SmartTodo
           # TODO(on: something('abc', '123', '456'), to: 'john@example.com', to: 'janne@example.com')
         RUBY
 
-        result = Todo.new(ruby_code)
+        result = Todo.new(ruby_code, line_number: 1)
         assert_equal(:something, result.events[0].method_name)
         assert_equal(["abc", "123", "456"], result.events[0].arguments)
         assert_equal(["john@example.com", "janne@example.com"], result.assignees)
@@ -54,7 +54,7 @@ module SmartTodo
           # TODO(on: something('abc', '123', '456'), to: 'john@example.com', to: 'john@example.com')
         RUBY
 
-        result = Todo.new(ruby_code)
+        result = Todo.new(ruby_code, line_number: 1)
         assert_equal(:something, result.events[0].method_name)
         assert_equal(["abc", "123", "456"], result.events[0].arguments)
         assert_equal(["john@example.com", "john@example.com"], result.assignees)
@@ -65,7 +65,7 @@ module SmartTodo
           # TODO(on: something('abc', '123', '456'), to: 'john@example.com')
         RUBY
 
-        result = Todo.new(ruby_code)
+        result = Todo.new(ruby_code, line_number: 1)
         assert_equal(:something, result.events[0].method_name)
         assert_equal(["abc", "123", "456"], result.events[0].arguments)
         assert_equal(["john@example.com"], result.assignees)
@@ -76,7 +76,7 @@ module SmartTodo
           # TODO(foo: 'bar', lol: 'ahah')
         RUBY
 
-        result = Todo.new(ruby_code)
+        result = Todo.new(ruby_code, line_number: 1)
         assert_empty(result.events)
         assert_empty(result.assignees)
       end
@@ -86,7 +86,7 @@ module SmartTodo
           # TODO(on: '2019-08-04')
         RUBY
 
-        result = Todo.new(ruby_code)
+        result = Todo.new(ruby_code, line_number: 1)
 
         assert_equal(["Incorrect `:on` event format: \"2019-08-04\""], result.errors)
       end
@@ -99,7 +99,7 @@ module SmartTodo
           end
         EOM
 
-        result = Todo.new(ruby_code)
+        result = Todo.new(ruby_code, line_number: 1)
         assert_empty(result.events)
         assert_empty(result.assignees)
       end
@@ -109,7 +109,7 @@ module SmartTodo
           # TODO: Do this when done
         RUBY
 
-        result = Todo.new(ruby_code)
+        result = Todo.new(ruby_code, line_number: 1)
         assert_empty(result.events)
         assert_empty(result.assignees)
       end

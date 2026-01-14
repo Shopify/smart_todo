@@ -10,11 +10,12 @@ module SmartTodo
       end
 
       def test_dispatch
-        dispatcher = Output.new("Foo", todo_node, "file.rb", @options)
+        todo = todo_node
+        dispatcher = Output.new("Foo", todo, todo.filepath, @options)
         expected_text = <<~HEREDOC
           Hello :wave:,
 
-          You have an assigned TODO in the `file.rb` file in repository `example`.
+          You have an assigned TODO in `#{todo.file_reference}` in repository `example`.
           Foo
 
           Here is the associated comment on your TODO:

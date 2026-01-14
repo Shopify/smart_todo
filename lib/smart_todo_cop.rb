@@ -28,7 +28,7 @@ module RuboCop
               next
             end
 
-            metadata = metadata(comment.text)
+            metadata = metadata(comment)
 
             if metadata.errors.any?
               add_offense(comment, message: "Invalid TODO format: #{metadata.errors.join(", ")}. #{HELP}")
@@ -44,10 +44,10 @@ module RuboCop
 
         private
 
-        # @param comment [String]
-        # @return [SmartTodo::Parser::Visitor]
+        # @param comment [RuboCop::AST::Comment]
+        # @return [SmartTodo::Todo]
         def metadata(comment)
-          ::SmartTodo::Todo.new(comment)
+          ::SmartTodo::Todo.new(comment.text, line_number: comment.loc.line)
         end
 
         # @param metadata [SmartTodo::Parser::Visitor]
