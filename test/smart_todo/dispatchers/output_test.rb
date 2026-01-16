@@ -16,12 +16,6 @@ module SmartTodo
 
           You have an assigned TODO in the `file.rb` file in repository `example`.
           Foo
-
-          Here is the associated comment on your TODO:
-
-          ```
-
-          ```
         HEREDOC
 
         assert_output(expected_text) { dispatcher.dispatch }

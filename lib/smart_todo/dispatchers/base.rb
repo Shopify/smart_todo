@@ -65,18 +65,26 @@ module SmartTodo
           existing_user
         end
 
-        <<~EOM
+        message = <<~EOM
           #{header}
 
           You have an assigned TODO in the `#{@file}` file#{repo}.
           #{@event_message}
-
-          Here is the associated comment on your TODO:
-
-          ```
-          #{@todo_node.comment.strip}
-          ```
         EOM
+
+        comment = @todo_node.comment.strip
+        unless comment.empty?
+          message += <<~EOM
+
+            Here is the associated comment on your TODO:
+
+            ```
+            #{comment}
+            ```
+          EOM
+        end
+
+        message
       end
 
       # Message in case a TODO's assignee doesn't exist in the Slack organization
