@@ -187,5 +187,92 @@ module SmartTodo
       assert_equal(:date, todo[0].events[0].method_name)
       assert_equal(["john@example.com"], todo[0].assignees)
     end
+
+    def test_parse_todo_captures_line_number
+      ruby_code = <<~RUBY
+        # TODO(on: date('2019-08-04'), to: 'john@example.com')
+        #   Remove this code once done
+        def hello
+        end
+      RUBY
+
+      todo = CommentParser.parse(ruby_code)
+      assert_equal(1, todo[0].line_number)
+    end
+
+    def test_parse_multiple_todos_captures_correct_line_numbers
+      ruby_code = <<~RUBY
+        # TODO(on: date('2019-08-04'), to: 'john@example.com')
+        #   First todo
+        def hello
+        end
+
+        # TODO(on: date('2019-08-04'), to: 'jane@example.com')
+        #   Second todo
+        def bar
+        end
+      RUBY
+
+      todos = CommentParser.parse(ruby_code)
+      assert_equal(2, todos.size)
+      assert_equal(1, todos[0].line_number)
+      assert_equal(6, todos[1].line_number)
+    end
+
+    def test_parse_todo_with_preceding_code_captures_correct_line_number
+      ruby_code = <<~RUBY
+        def hello
+        end
+
+        # TODO(on: date('2019-08-04'), to: 'john@example.com')
+        #   Remove this code once done
+        def world
+        end
+      RUBY
+
+      todo = CommentParser.parse(ruby_code)
+      assert_equal(1, todo.size)
+      assert_equal(4, todo[0].line_number)
+    end
+
+    def test_parse_todo_single_line_has_same_start_and_end_line
+      ruby_code = <<~RUBY
+        # TODO(on: date('2019-08-04'), to: 'john@example.com')
+        def hello
+        end
+      RUBY
+
+      todo = CommentParser.parse(ruby_code)
+      assert_equal(1, todo[0].line_number)
+      assert_equal(1, todo[0].end_line_number)
+    end
+
+    def test_parse_todo_multi_line_captures_end_line_number
+      ruby_code = <<~RUBY
+        # TODO(on: date('2019-08-04'), to: 'john@example.com')
+        #   Remove this code once done
+        #   This is important
+        #   Please don't disappoint me
+        def hello
+        end
+      RUBY
+
+      todo = CommentParser.parse(ruby_code)
+      assert_equal(1, todo[0].line_number)
+      assert_equal(4, todo[0].end_line_number)
+    end
+
+    def test_parse_todo_with_single_continuation_line
+      ruby_code = <<~RUBY
+        # TODO(on: date('2019-08-04'), to: 'john@example.com')
+        #   Just one extra line
+        def hello
+        end
+      RUBY
+
+      todo = CommentParser.parse(ruby_code)
+      assert_equal(1, todo[0].line_number)
+      assert_equal(2, todo[0].end_line_number)
+    end
   end
 end

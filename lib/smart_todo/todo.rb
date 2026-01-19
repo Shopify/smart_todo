@@ -2,12 +2,46 @@
 
 module SmartTodo
   class Todo
-    attr_reader :filepath, :comment, :indent
+    attr_reader :filepath, :comment, :indent, :line_number
     attr_reader :events, :assignees, :errors
     attr_accessor :context
 
-    def initialize(source, filepath = "-e")
+    def end_line_number
+      return unless line_number
+
+      line_number + comment.count("\n")
+    end
+
+    def line_reference
+      return unless line_number
+
+      if end_line_number != line_number
+        "#{line_number}-#{end_line_number}"
+      else
+        line_number.to_s
+      end
+    end
+
+    def file_reference
+      if line_reference
+        "#{filepath}:#{line_reference}"
+      else
+        filepath
+      end
+    end
+
+    def initialize(source, filepath = "-e", line_number: nil)
       @filepath = filepath
+      @line_number = line_number
+
+      if line_number.nil?
+        warn(
+          "Calling `SmartTodo::Todo.new` without `line_number:` is deprecated " \
+            "and will become required in a future version.",
+          category: :deprecated,
+          uplevel: 1,
+        )
+      end
       @comment = +""
       @indent = source[/^#(\s+)/, 1].length
 

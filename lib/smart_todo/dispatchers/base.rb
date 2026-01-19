@@ -68,7 +68,7 @@ module SmartTodo
         message = <<~EOM
           #{header}
 
-          You have an assigned TODO in the `#{@file}` file#{repo}.
+          You have an assigned TODO in #{slack_file_reference(@todo_node)}#{repo}.
           #{@event_message}
         EOM
 
@@ -106,6 +106,17 @@ module SmartTodo
 
         unless repo.empty?
           " in repository `#{repo}`"
+        end
+      end
+
+      # Format file reference for Slack
+      # Uses deep link if available, otherwise falls back to code-formatted path
+      def slack_file_reference(todo)
+        link = DeepLink.for_todo(todo)
+        if link
+          "<#{link.url}|#{link.display}>"
+        else
+          "`#{todo.file_reference}`"
         end
       end
     end
